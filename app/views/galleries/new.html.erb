@@ -1,0 +1,28 @@
+<div class="max-w-2xl mx-auto">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Create New Gallery</h1>
+
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <%= form_with model: @gallery, class: "space-y-6" do |form| %>
+      <div>
+        <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_field :title, required: true, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "Family Vacation 2025" %>
+        <% if @gallery.errors[:title].any? %>
+          <p class="mt-2 text-sm text-red-600"><%= @gallery.errors[:title].first %></p>
+        <% end %>
+      </div>
+
+      <div>
+        <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_area :description, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "Our amazing trip to..." %>
+        <% if @gallery.errors[:description].any? %>
+          <p class="mt-2 text-sm text-red-600"><%= @gallery.errors[:description].first %></p>
+        <% end %>
+      </div>
+
+      <div class="flex justify-between">
+        <%= link_to "Cancel", galleries_path, class: "px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium transition-colors" %>
+        <%= form.submit "Create Gallery", class: "px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium shadow-sm transition-colors" %>
+      </div>
+    <% end %>
+  </div>
+</div>

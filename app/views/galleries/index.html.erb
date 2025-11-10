@@ -1,0 +1,56 @@
+<div class="max-w-7xl mx-auto">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Family Galleries</h1>
+    <%= link_to "Create New Gallery", new_gallery_path, class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-colors md:hidden" %>
+  </div>
+
+  <% if @galleries.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @galleries.each do |gallery| %>
+        <%= link_to gallery, class: "group block" do %>
+          <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow">
+            <div class="aspect-video bg-gray-200 relative">
+              <% if gallery.uploads.first&.file&.attached? %>
+                <%= image_tag gallery.uploads.first.file.variant(resize_to_limit: [800, 600]),
+                    class: "w-full h-full object-cover",
+                    loading: "lazy" %>
+              <% else %>
+                <div class="flex items-center justify-center h-full text-gray-400">
+                  <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+              <% end %>
+              <div class="absolute top-2 right-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded">
+                <%= gallery.uploads.count %> <%= gallery.uploads.count == 1 ? "photo" : "photos" %>
+              </div>
+            </div>
+            <div class="p-4">
+              <h2 class="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                <%= gallery.title %>
+              </h2>
+              <% if gallery.description.present? %>
+                <p class="text-gray-600 mt-2 line-clamp-2"><%= gallery.description %></p>
+              <% end %>
+              <div class="flex items-center justify-between mt-4 text-sm text-gray-500">
+                <span>By <%= gallery.user.name %></span>
+                <span><%= time_ago_in_words(gallery.created_at) %> ago</span>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No galleries yet</h3>
+      <p class="mt-1 text-sm text-gray-500">Get started by creating a new gallery.</p>
+      <div class="mt-6">
+        <%= link_to "Create Gallery", new_gallery_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>
