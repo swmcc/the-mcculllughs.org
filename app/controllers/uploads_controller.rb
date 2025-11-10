@@ -32,9 +32,12 @@ class UploadsController < ApplicationController
         message = "#{success_count} #{success_count == 1 ? 'photo' : 'photos'} uploaded successfully"
         message += ". #{errors.length} failed." if errors.any?
         format.html { redirect_to @gallery, notice: message }
-        format.turbo_stream
+        format.turbo_stream { head :ok }
+        format.json { render json: { success: true, message: message }, status: :ok }
       else
         format.html { redirect_to @gallery, alert: "Failed to upload files: #{errors.join(', ')}" }
+        format.turbo_stream { head :unprocessable_entity }
+        format.json { render json: { success: false, errors: errors }, status: :unprocessable_entity }
       end
     end
   end

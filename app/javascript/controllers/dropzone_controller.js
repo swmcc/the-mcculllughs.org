@@ -9,47 +9,35 @@ export default class extends Controller {
 
   connect() {
     this.files = []
-    this.setupDragAndDrop()
+    console.log("Dropzone controller connected")
   }
 
-  setupDragAndDrop() {
-    const dropzone = this.dropzoneTarget
-
-    // Prevent default drag behaviors
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, this.preventDefaults, false)
-      document.body.addEventListener(eventName, this.preventDefaults, false)
-    })
-
-    // Highlight drop zone when item is dragged over it
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropzone.addEventListener(eventName, () => this.highlight(), false)
-    })
-
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropzone.addEventListener(eventName, () => this.unhighlight(), false)
-    })
-
-    // Handle dropped files
-    dropzone.addEventListener('drop', (e) => this.handleDrop(e), false)
-  }
-
-  preventDefaults(e) {
+  // Prevent default for drag events
+  dragover(e) {
     e.preventDefault()
     e.stopPropagation()
-  }
-
-  highlight() {
     this.dropzoneTarget.classList.add('border-blue-500', 'bg-blue-500/10')
   }
 
-  unhighlight() {
+  dragenter(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.dropzoneTarget.classList.add('border-blue-500', 'bg-blue-500/10')
+  }
+
+  dragleave(e) {
+    e.preventDefault()
+    e.stopPropagation()
     this.dropzoneTarget.classList.remove('border-blue-500', 'bg-blue-500/10')
   }
 
-  handleDrop(e) {
-    const dt = e.dataTransfer
-    const files = dt.files
+  drop(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.dropzoneTarget.classList.remove('border-blue-500', 'bg-blue-500/10')
+
+    const files = e.dataTransfer.files
+    console.log("Files dropped:", files.length)
     this.handleFiles(files)
   }
 
@@ -196,11 +184,13 @@ export default class extends Controller {
       body: formData,
       headers: {
         'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content,
-        'Accept': 'text/vnd.turbo-stream.html'
+        'Accept': 'text/vnd.turbo-stream.html, application/json'
       }
     })
     .then(response => {
-      if (response.ok) {
+      console.log('Upload response status:', response.status, 'ok:', response.ok)
+      // Accept 200-299 status codes as success
+      if (response.ok || response.status === 302) {
         // Reset form
         this.files = []
         this.previewTarget.innerHTML = ''
@@ -210,10 +200,14 @@ export default class extends Controller {
         // Reload the page to show new uploads
         window.location.reload()
       } else {
-        throw new Error('Upload failed')
+        return response.text().then(text => {
+          console.error('Upload failed with status:', response.status, 'Body:', text)
+          throw new Error(`Upload failed with status ${response.status}`)
+        })
       }
     })
     .catch(error => {
+      console.error('Upload error:', error)
       this.showError('Upload failed. Please try again.')
       this.hideUploading()
     })
