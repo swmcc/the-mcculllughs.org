@@ -1,73 +1,95 @@
-<div class="max-w-7xl mx-auto">
-  <div class="mb-8">
-    <%= link_to galleries_path, class: "text-blue-600 hover:text-blue-800 inline-flex items-center" do %>
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <%= link_to galleries_path, class: "inline-flex items-center text-sm text-white/60 hover:text-white transition-colors" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
       </svg>
       Back to Galleries
     <% end %>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <div class="flex justify-between items-start">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900"><%= @gallery.title %></h1>
+  <div class="bg-neutral-800/50 backdrop-blur-sm rounded-lg border border-white/10 p-6 mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+      <div class="flex-1">
+        <h1 class="text-2xl font-semibold text-white mb-2"><%= @gallery.title %></h1>
         <% if @gallery.description.present? %>
-          <p class="text-gray-600 mt-2"><%= @gallery.description %></p>
+          <p class="text-white/70 text-sm mb-3"><%= @gallery.description %></p>
         <% end %>
-        <p class="text-sm text-gray-500 mt-4">Created by <%= @gallery.user.name %> <%= time_ago_in_words(@gallery.created_at) %> ago</p>
+        <div class="flex items-center space-x-4 text-xs text-white/50">
+          <span><%= @gallery.user.name %></span>
+          <span>•</span>
+          <span><%= pluralize(@gallery.uploads.count, 'photo') %></span>
+          <span>•</span>
+          <span><%= time_ago_in_words(@gallery.created_at) %> ago</span>
+        </div>
       </div>
-      <div class="flex space-x-2">
-        <%= link_to "Edit", edit_gallery_path(@gallery), class: "px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-md" %>
-        <%= button_to "Delete", gallery_path(@gallery), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "px-4 py-2 text-red-600 hover:bg-red-50 rounded-md" %>
+      <div class="flex items-center space-x-2 mt-4 lg:mt-0">
+        <%= link_to edit_gallery_path(@gallery), class: "px-3 py-1.5 text-xs text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" do %>
+          Edit
+        <% end %>
+        <%= button_to gallery_path(@gallery), method: :delete, data: { turbo_confirm: "Delete this gallery and all photos?" }, class: "px-3 py-1.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors" do %>
+          Delete
+        <% end %>
       </div>
     </div>
   </div>
 
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-4">Upload Photos</h2>
+  <div class="bg-neutral-800/50 backdrop-blur-sm rounded-lg border border-white/10 p-6 mb-8">
+    <h2 class="text-lg font-medium text-white mb-4">Upload Photos</h2>
     <%= form_with model: @upload, url: gallery_uploads_path(@gallery), multipart: true, class: "space-y-4" do |form| %>
-      <div>
-        <%= form.label :file, "Choose photos or videos", class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.file_field :file, accept: "image/*,video/*", class: "block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <%= form.label :file, "Choose file", class: "block text-sm font-medium text-white/70 mb-2" %>
+          <%= form.file_field :file, accept: "image/*,video/*", class: "block w-full text-sm text-white/70 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 file:cursor-pointer" %>
+        </div>
+        <div>
+          <%= form.label :title, "Title (optional)", class: "block text-sm font-medium text-white/70 mb-2" %>
+          <%= form.text_field :title, class: "block w-full rounded-lg bg-neutral-900 border border-white/10 text-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder: "Summer vacation..." %>
+        </div>
       </div>
       <div>
-        <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.text_field :title, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+        <%= form.label :caption, "Caption (optional)", class: "block text-sm font-medium text-white/70 mb-2" %>
+        <%= form.text_area :caption, rows: 2, class: "block w-full rounded-lg bg-neutral-900 border border-white/10 text-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder: "Add a description..." %>
       </div>
-      <div>
-        <%= form.label :caption, class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.text_area :caption, rows: 3, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
-      </div>
-      <%= form.submit "Upload", class: "w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-md font-medium shadow-sm transition-colors" %>
+      <%= form.submit "Upload", class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer" %>
     <% end %>
   </div>
 
   <% if @uploads.any? %>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
       <% @uploads.each do |upload| %>
-        <div class="group relative aspect-square bg-gray-200 rounded-lg overflow-hidden">
+        <div class="group relative aspect-square bg-neutral-800 rounded-lg overflow-hidden" data-controller="photo-hover">
           <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
               class: "w-full h-full object-cover",
               loading: "lazy",
               alt: upload.title %>
-          <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity flex items-center justify-center">
-            <div class="opacity-0 group-hover:opacity-100 transition-opacity space-x-2">
-              <%= button_to upload_path(upload), method: :delete, data: { turbo_confirm: "Delete this photo?" }, class: "inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm" do %>
-                Delete
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+              <% if upload.title.present? %>
+                <p class="text-white text-xs font-medium mb-1"><%= upload.title %></p>
               <% end %>
+              <div class="flex items-center justify-between">
+                <span class="text-white/70 text-xs"><%= time_ago_in_words(upload.created_at) %> ago</span>
+                <%= button_to upload_path(upload), method: :delete, data: { turbo_confirm: "Delete this photo?" }, class: "text-red-400 hover:text-red-300 transition-colors" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                <% end %>
+              </div>
             </div>
           </div>
         </div>
       <% end %>
     </div>
   <% else %>
-    <div class="text-center py-12 bg-white rounded-lg shadow-md">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-      </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">No photos yet</h3>
-      <p class="mt-1 text-sm text-gray-500">Upload your first photo to get started.</p>
+    <div class="text-center py-20 bg-neutral-800/30 rounded-lg border border-white/5">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-neutral-800 rounded-full mb-4">
+        <svg class="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-white mb-2">No photos yet</h3>
+      <p class="text-white/60 text-sm">Upload your first photo to get started</p>
     </div>
   <% end %>
 </div>

@@ -1,27 +1,36 @@
-<div class="max-w-2xl mx-auto">
-  <h1 class="text-3xl font-bold text-gray-900 mb-8">Create New Gallery</h1>
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <%= link_to galleries_path, class: "inline-flex items-center text-sm text-white/60 hover:text-white transition-colors" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back
+    <% end %>
+  </div>
 
-  <div class="bg-white rounded-lg shadow-md p-6">
+  <h1 class="text-2xl font-semibold text-white mb-6">Create New Gallery</h1>
+
+  <div class="bg-neutral-800/50 backdrop-blur-sm rounded-lg border border-white/10 p-6">
     <%= form_with model: @gallery, class: "space-y-6" do |form| %>
       <div>
-        <%= form.label :title, class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.text_field :title, required: true, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "Family Vacation 2025" %>
+        <%= form.label :title, class: "block text-sm font-medium text-white/70 mb-2" %>
+        <%= form.text_field :title, required: true, autofocus: true, class: "block w-full rounded-lg bg-neutral-900 border border-white/10 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent", placeholder: "Family Vacation 2025" %>
         <% if @gallery.errors[:title].any? %>
-          <p class="mt-2 text-sm text-red-600"><%= @gallery.errors[:title].first %></p>
+          <p class="mt-2 text-sm text-red-400"><%= @gallery.errors[:title].first %></p>
         <% end %>
       </div>
 
       <div>
-        <%= form.label :description, class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= form.text_area :description, rows: 4, class: "block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm", placeholder: "Our amazing trip to..." %>
+        <%= form.label :description, "Description (optional)", class: "block text-sm font-medium text-white/70 mb-2" %>
+        <%= form.text_area :description, rows: 4, class: "block w-full rounded-lg bg-neutral-900 border border-white/10 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none", placeholder: "Add details about this gallery..." %>
         <% if @gallery.errors[:description].any? %>
-          <p class="mt-2 text-sm text-red-600"><%= @gallery.errors[:description].first %></p>
+          <p class="mt-2 text-sm text-red-400"><%= @gallery.errors[:description].first %></p>
         <% end %>
       </div>
 
-      <div class="flex justify-between">
-        <%= link_to "Cancel", galleries_path, class: "px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md font-medium transition-colors" %>
-        <%= form.submit "Create Gallery", class: "px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium shadow-sm transition-colors" %>
+      <div class="flex items-center justify-between pt-4">
+        <%= link_to "Cancel", galleries_path, class: "px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-lg transition-colors" %>
+        <%= form.submit "Create Gallery", class: "px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer" %>
       </div>
     <% end %>
   </div>
