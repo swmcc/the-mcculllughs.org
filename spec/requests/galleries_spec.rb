@@ -1,52 +1,63 @@
 require 'rails_helper'
 
 RSpec.describe "Galleries", type: :request do
-  describe "GET /index" do
+  let(:user) { create(:user) }
+  let(:gallery) { create(:gallery, user: user) }
+
+  before { login_as user, scope: :user }
+
+  describe "GET /galleries" do
     it "returns http success" do
-      get "/galleries/index"
+      get "/galleries"
       expect(response).to have_http_status(:success)
     end
   end
 
-  describe "GET /show" do
+  describe "GET /galleries/:id" do
     it "returns http success" do
-      get "/galleries/show"
+      get "/galleries/#{gallery.id}"
       expect(response).to have_http_status(:success)
     end
   end
 
-  describe "GET /new" do
+  describe "GET /galleries/new" do
     it "returns http success" do
       get "/galleries/new"
       expect(response).to have_http_status(:success)
     end
   end
 
-  describe "GET /create" do
+  describe "POST /galleries" do
+    it "creates a gallery and redirects" do
+      expect {
+        post "/galleries", params: { gallery: { title: "Test Gallery", description: "Test" } }
+      }.to change(Gallery, :count).by(1)
+      expect(response).to have_http_status(:redirect)
+    end
+  end
+
+  describe "GET /galleries/:id/edit" do
     it "returns http success" do
-      get "/galleries/create"
+      get "/galleries/#{gallery.id}/edit"
       expect(response).to have_http_status(:success)
     end
   end
 
-  describe "GET /edit" do
-    it "returns http success" do
-      get "/galleries/edit"
-      expect(response).to have_http_status(:success)
+  describe "PATCH /galleries/:id" do
+    it "updates the gallery and redirects" do
+      patch "/galleries/#{gallery.id}", params: { gallery: { title: "Updated Title" } }
+      expect(response).to have_http_status(:redirect)
+      expect(gallery.reload.title).to eq("Updated Title")
     end
   end
 
-  describe "GET /update" do
-    it "returns http success" do
-      get "/galleries/update"
-      expect(response).to have_http_status(:success)
-    end
-  end
-
-  describe "GET /destroy" do
-    it "returns http success" do
-      get "/galleries/destroy"
-      expect(response).to have_http_status(:success)
+  describe "DELETE /galleries/:id" do
+    it "deletes the gallery and redirects" do
+      gallery # create it first
+      expect {
+        delete "/galleries/#{gallery.id}"
+      }.to change(Gallery, :count).by(-1)
+      expect(response).to have_http_status(:redirect)
     end
   end
 end
