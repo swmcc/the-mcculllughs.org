@@ -1,7 +1,6 @@
 source "https://rubygems.org"
 
 gem "aws-sdk-s3", require: false
-gem "connection_pool", "~> 2.5"
 gem "bootsnap", require: false
 gem "devise"
 gem "dotenv-rails"
