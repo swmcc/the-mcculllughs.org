@@ -22,7 +22,7 @@ RSpec.describe Upload, type: :model do
         old_upload = create(:upload, user: user, gallery: gallery, created_at: 2.days.ago)
         new_upload = create(:upload, user: user, gallery: gallery, created_at: 1.day.ago)
 
-        expect(Upload.recent).to eq([new_upload, old_upload])
+        expect(Upload.recent).to eq([ new_upload, old_upload ])
       end
     end
   end

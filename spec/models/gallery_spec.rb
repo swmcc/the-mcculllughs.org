@@ -18,7 +18,7 @@ RSpec.describe Gallery, type: :model do
         old_gallery = create(:gallery, user: user, created_at: 2.days.ago)
         new_gallery = create(:gallery, user: user, created_at: 1.day.ago)
 
-        expect(Gallery.recent).to eq([new_gallery, old_gallery])
+        expect(Gallery.recent).to eq([ new_gallery, old_gallery ])
       end
     end
   end
