@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus"]
+  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "infoPanel"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 },
@@ -10,6 +10,7 @@ export default class extends Controller {
 
   connect() {
     this.saveTimeout = null
+    this.infoPanelOpen = false
     this.imageTarget.onerror = () => {
       const image = this.imagesValue[this.indexValue]
       if (this.imageTarget.src !== image.original) {
@@ -22,6 +23,7 @@ export default class extends Controller {
     event.preventDefault()
     const index = parseInt(event.currentTarget.dataset.index)
     this.indexValue = index
+    this.infoPanelOpen = false
     this.show()
   }
 
@@ -29,30 +31,27 @@ export default class extends Controller {
     const image = this.imagesValue[this.indexValue]
     this.imageTarget.src = image.large || image.original
 
-    // Update display elements
-    if (this.hasTitleTarget) {
-      this.titleTarget.textContent = image.title || ""
-      this.titleTarget.classList.toggle("hidden", this.canEditValue || !image.title)
+    // Update editable inputs or read-only display
+    if (this.canEditValue && this.hasTitleInputTarget) {
+      this.titleInputTarget.value = image.title || ""
     }
-
+    if (this.canEditValue && this.hasCaptionInputTarget) {
+      this.captionInputTarget.value = image.caption || ""
+    }
+    if (this.hasTitleTarget) {
+      this.titleTarget.textContent = image.title || "Untitled"
+    }
     if (this.hasCaptionTarget) {
       this.captionTarget.textContent = image.caption || ""
-      this.captionTarget.classList.toggle("hidden", this.canEditValue || !image.caption)
+      this.captionTarget.classList.toggle("hidden", !image.caption)
+    }
+    if (this.hasSaveStatusTarget) {
+      this.saveStatusTarget.textContent = ""
     }
 
-    // Update editable inputs
-    if (this.canEditValue) {
-      if (this.hasTitleInputTarget) {
-        this.titleInputTarget.value = image.title || ""
-        this.titleInputTarget.classList.remove("hidden")
-      }
-      if (this.hasCaptionInputTarget) {
-        this.captionInputTarget.value = image.caption || ""
-        this.captionInputTarget.classList.remove("hidden")
-      }
-      if (this.hasSaveStatusTarget) {
-        this.saveStatusTarget.textContent = ""
-      }
+    // Update info panel state
+    if (this.hasInfoPanelTarget) {
+      this.infoPanelTarget.classList.toggle("translate-x-full", !this.infoPanelOpen)
     }
 
     this.counterTarget.textContent = `${this.indexValue + 1} / ${this.imagesValue.length}`
@@ -63,6 +62,14 @@ export default class extends Controller {
 
     this.modalTarget.classList.remove("hidden")
     document.body.classList.add("overflow-hidden")
+  }
+
+  toggleInfo(event) {
+    event.stopPropagation()
+    this.infoPanelOpen = !this.infoPanelOpen
+    if (this.hasInfoPanelTarget) {
+      this.infoPanelTarget.classList.toggle("translate-x-full", !this.infoPanelOpen)
+    }
   }
 
   handleInput(event) {
@@ -97,7 +104,6 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-        // Update local data
         this.imagesValue[this.indexValue].title = title
         this.imagesValue[this.indexValue].caption = caption
 
@@ -182,7 +188,6 @@ export default class extends Controller {
   keydown(event) {
     if (this.modalTarget.classList.contains("hidden")) return
 
-    // Don't handle keys if user is typing in input
     if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
       if (event.key === "Escape") {
         event.target.blur()
@@ -199,6 +204,9 @@ export default class extends Controller {
         break
       case "ArrowRight":
         this.next(event)
+        break
+      case "i":
+        this.toggleInfo(event)
         break
     }
   }
