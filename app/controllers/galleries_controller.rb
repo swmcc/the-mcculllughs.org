@@ -17,14 +17,10 @@ class GalleriesController < ApplicationController
   def create
     @gallery = current_user.galleries.build(gallery_params)
 
-    respond_to do |format|
-      if @gallery.save
-        format.html { redirect_to @gallery, notice: "Gallery was successfully created." }
-        format.turbo_stream
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.turbo_stream { render :new, status: :unprocessable_entity }
-      end
+    if @gallery.save
+      redirect_to @gallery, notice: "Gallery was successfully created."
+    else
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -32,24 +28,16 @@ class GalleriesController < ApplicationController
   end
 
   def update
-    respond_to do |format|
-      if @gallery.update(gallery_params)
-        format.html { redirect_to @gallery, notice: "Gallery was successfully updated." }
-        format.turbo_stream
-      else
-        format.html { render :edit, status: :unprocessable_entity }
-        format.turbo_stream { render :edit, status: :unprocessable_entity }
-      end
+    if @gallery.update(gallery_params)
+      redirect_to @gallery, notice: "Gallery was successfully updated."
+    else
+      render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
     @gallery.destroy
-
-    respond_to do |format|
-      format.html { redirect_to galleries_path, notice: "Gallery was successfully deleted." }
-      format.turbo_stream
-    end
+    redirect_to galleries_path, notice: "Gallery was successfully deleted."
   end
 
   private
