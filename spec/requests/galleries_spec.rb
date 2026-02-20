@@ -34,6 +34,22 @@ RSpec.describe "Galleries", type: :request do
       }.to change(Gallery, :count).by(1)
       expect(response).to have_http_status(:redirect)
     end
+
+    it "creates a gallery via Turbo and redirects" do
+      expect {
+        post "/galleries",
+          params: { gallery: { title: "Test Gallery", description: "Test" } },
+          headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      }.to change(Gallery, :count).by(1)
+      expect(response).to have_http_status(:redirect)
+    end
+
+    it "returns unprocessable_entity for invalid gallery via Turbo" do
+      post "/galleries",
+        params: { gallery: { title: "", description: "Test" } },
+        headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
   end
 
   describe "GET /galleries/:id/edit" do
