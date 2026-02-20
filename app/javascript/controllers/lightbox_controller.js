@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "infoPanel"]
+  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "infoPanel", "noInfo"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 },
@@ -31,22 +31,32 @@ export default class extends Controller {
     const image = this.imagesValue[this.indexValue]
     this.imageTarget.src = image.large || image.original
 
-    // Update editable inputs or read-only display
+    // Update editable inputs
     if (this.canEditValue && this.hasTitleInputTarget) {
       this.titleInputTarget.value = image.title || ""
     }
     if (this.canEditValue && this.hasCaptionInputTarget) {
       this.captionInputTarget.value = image.caption || ""
     }
+    if (this.hasSaveStatusTarget) {
+      this.saveStatusTarget.textContent = ""
+    }
+
+    // Update bottom info bar
+    const hasTitle = image.title && image.title.trim()
+    const hasCaption = image.caption && image.caption.trim()
+    const hasAnyInfo = hasTitle || hasCaption
+
     if (this.hasTitleTarget) {
-      this.titleTarget.textContent = image.title || "Untitled"
+      this.titleTarget.textContent = image.title || ""
+      this.titleTarget.classList.toggle("hidden", !hasTitle)
     }
     if (this.hasCaptionTarget) {
       this.captionTarget.textContent = image.caption || ""
-      this.captionTarget.classList.toggle("hidden", !image.caption)
+      this.captionTarget.classList.toggle("hidden", !hasCaption)
     }
-    if (this.hasSaveStatusTarget) {
-      this.saveStatusTarget.textContent = ""
+    if (this.hasNoInfoTarget) {
+      this.noInfoTarget.classList.toggle("hidden", hasAnyInfo)
     }
 
     // Update info panel state
