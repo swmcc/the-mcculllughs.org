@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "caption", "counter"]
+  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 }
@@ -16,22 +16,66 @@ export default class extends Controller {
 
   show() {
     const image = this.imagesValue[this.indexValue]
-    this.imageTarget.src = image.url
+    this.imageTarget.src = image.large
     this.imageTarget.alt = image.title || ""
-    this.captionTarget.textContent = image.title || ""
+
+    // Update title and caption
+    this.titleTarget.textContent = image.title || ""
+    this.titleTarget.classList.toggle("hidden", !image.title)
+
+    this.captionTarget.textContent = image.caption || ""
+    this.captionTarget.classList.toggle("hidden", !image.caption)
+
+    // Update counter
     this.counterTarget.textContent = `${this.indexValue + 1} / ${this.imagesValue.length}`
+
+    // Update download links
+    this.updateDownloadLinks(image)
+
+    // Update prev/next button visibility
+    this.prevBtnTarget.classList.toggle("invisible", this.indexValue === 0)
+    this.nextBtnTarget.classList.toggle("invisible", this.indexValue === this.imagesValue.length - 1)
+
+    // Show modal
     this.modalTarget.classList.remove("hidden")
     document.body.classList.add("overflow-hidden")
+  }
+
+  updateDownloadLinks(image) {
+    const menu = this.downloadMenuTarget
+    menu.innerHTML = ""
+
+    const sizes = [
+      { name: "Original", url: image.original, desc: "Full resolution" },
+      { name: "Large", url: image.large, desc: "2048px" },
+      { name: "Medium", url: image.medium, desc: "1024px" },
+      { name: "Small", url: image.small, desc: "640px" }
+    ]
+
+    sizes.forEach(size => {
+      const link = document.createElement("a")
+      link.href = size.url
+      link.download = ""
+      link.target = "_blank"
+      link.className = "flex items-center justify-between px-4 py-2 text-sm text-white/90 hover:bg-white/10 transition-colors"
+      link.innerHTML = `
+        <span>${size.name}</span>
+        <span class="text-white/50 text-xs">${size.desc}</span>
+      `
+      menu.appendChild(link)
+    })
+  }
+
+  toggleDownload(event) {
+    event.stopPropagation()
+    this.downloadMenuTarget.classList.toggle("hidden")
   }
 
   close(event) {
     if (event) event.stopPropagation()
     this.modalTarget.classList.add("hidden")
+    this.downloadMenuTarget.classList.add("hidden")
     document.body.classList.remove("overflow-hidden")
-  }
-
-  stopPropagation(event) {
-    event.stopPropagation()
   }
 
   prev(event) {
@@ -50,13 +94,16 @@ export default class extends Controller {
     }
   }
 
+  stopPropagation(event) {
+    event.stopPropagation()
+  }
+
   keydown(event) {
     if (this.modalTarget.classList.contains("hidden")) return
 
     switch (event.key) {
       case "Escape":
-        this.modalTarget.classList.add("hidden")
-        document.body.classList.remove("overflow-hidden")
+        this.close()
         break
       case "ArrowLeft":
         this.prev(event)
@@ -65,13 +112,5 @@ export default class extends Controller {
         this.next(event)
         break
     }
-  }
-
-  get hasPrev() {
-    return this.indexValue > 0
-  }
-
-  get hasNext() {
-    return this.indexValue < this.imagesValue.length - 1
   }
 }

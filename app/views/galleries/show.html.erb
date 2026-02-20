@@ -1,4 +1,16 @@
-<% images_data = @uploads.map.with_index { |u, i| { url: url_for(u.file), title: u.title, index: i } } %>
+<%
+  images_data = @uploads.map.with_index do |u, i|
+    {
+      index: i,
+      title: u.title,
+      caption: u.caption,
+      original: url_for(u.file),
+      large: url_for(u.file.variant(resize_to_limit: [2048, 2048])),
+      medium: url_for(u.file.variant(resize_to_limit: [1024, 1024])),
+      small: url_for(u.file.variant(resize_to_limit: [640, 640]))
+    }
+  end
+%>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
      data-controller="lightbox"
@@ -108,38 +120,78 @@
   <!-- Lightbox Modal -->
   <div data-lightbox-target="modal"
        data-action="click->lightbox#close"
-       class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+       class="hidden fixed inset-0 z-50 bg-black flex">
 
-    <!-- Close button -->
-    <button data-action="click->lightbox#close" class="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors">
-      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
-    </button>
+    <!-- Main image area -->
+    <div class="flex-1 flex items-center justify-center relative" data-action="click->lightbox#stopPropagation">
+      <!-- Close button -->
+      <button data-action="click->lightbox#close" class="absolute top-4 left-4 p-2 text-white/70 hover:text-white transition-colors z-10">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
 
-    <!-- Prev button -->
-    <button data-action="click->lightbox#prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors">
-      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-      </svg>
-    </button>
+      <!-- Counter -->
+      <div class="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+        <span data-lightbox-target="counter" class="text-white/70 text-sm"></span>
+      </div>
 
-    <!-- Next button -->
-    <button data-action="click->lightbox#next" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors">
-      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-      </svg>
-    </button>
+      <!-- Prev button -->
+      <button data-lightbox-target="prevBtn" data-action="click->lightbox#prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
 
-    <!-- Image container -->
-    <div class="max-w-5xl max-h-[85vh] px-16" data-action="click->lightbox#stopPropagation">
-      <img data-lightbox-target="image" src="" alt="" class="max-w-full max-h-[85vh] object-contain">
+      <!-- Image -->
+      <img data-lightbox-target="image" src="" alt="" class="max-w-full max-h-full object-contain p-4">
+
+      <!-- Next button -->
+      <button data-lightbox-target="nextBtn" data-action="click->lightbox#next" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </button>
     </div>
 
-    <!-- Caption and counter -->
-    <div class="absolute bottom-4 left-0 right-0 text-center">
-      <p data-lightbox-target="caption" class="text-white text-sm mb-1"></p>
-      <p data-lightbox-target="counter" class="text-white/50 text-xs"></p>
+    <!-- Info sidebar (Flickr-style) -->
+    <div class="w-80 bg-neutral-900 border-l border-white/10 flex flex-col" data-action="click->lightbox#stopPropagation">
+      <!-- Header -->
+      <div class="p-4 border-b border-white/10">
+        <h2 data-lightbox-target="title" class="text-lg font-medium text-white mb-2"></h2>
+        <p data-lightbox-target="caption" class="text-sm text-white/70"></p>
+      </div>
+
+      <!-- Download section -->
+      <div class="p-4 border-b border-white/10">
+        <div class="relative">
+          <button data-action="click->lightbox#toggleDownload" class="w-full flex items-center justify-between px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+            <span class="flex items-center space-x-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <span>Download</span>
+            </span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Download dropdown -->
+          <div data-lightbox-target="downloadMenu" class="hidden absolute top-full left-0 right-0 mt-1 bg-neutral-800 border border-white/10 rounded-lg overflow-hidden shadow-xl z-10">
+            <!-- Links populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-1"></div>
+
+      <!-- Footer -->
+      <div class="p-4 border-t border-white/10 text-xs text-white/50">
+        <p>Use arrow keys to navigate</p>
+        <p>Press Escape to close</p>
+      </div>
     </div>
   </div>
 </div>
