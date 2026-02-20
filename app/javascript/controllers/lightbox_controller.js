@@ -75,7 +75,7 @@ export default class extends Controller {
     }
 
     clearTimeout(this.saveTimeout)
-    this.saveTimeout = setTimeout(() => this.save(), 800)
+    this.saveTimeout = setTimeout(() => this.save(), 400)
   }
 
   async save() {
@@ -102,6 +102,26 @@ export default class extends Controller {
         // Update local data
         this.imagesValue[this.indexValue].title = title
         this.imagesValue[this.indexValue].caption = caption
+
+        // Update the thumbnail overlay in the gallery grid
+        const uploadId = image.id
+        const thumbnailEl = document.getElementById(`upload_${uploadId}`)
+        if (thumbnailEl) {
+          const titleEl = thumbnailEl.querySelector('p.text-white.text-xs.font-medium')
+          if (titleEl) {
+            titleEl.textContent = title
+            titleEl.classList.toggle('hidden', !title)
+          } else if (title) {
+            // Create title element if it doesn't exist
+            const overlay = thumbnailEl.querySelector('.absolute.bottom-0')
+            if (overlay) {
+              const newTitle = document.createElement('p')
+              newTitle.className = 'text-white text-xs font-medium mb-1'
+              newTitle.textContent = title
+              overlay.insertBefore(newTitle, overlay.firstChild)
+            }
+          }
+        }
 
         if (this.hasSaveStatusTarget) {
           this.saveStatusTarget.textContent = "Saved"
