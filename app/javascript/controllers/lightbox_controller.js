@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "infoPanel", "noInfo"]
+  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "noInfo"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 },
@@ -10,7 +10,6 @@ export default class extends Controller {
 
   connect() {
     this.saveTimeout = null
-    this.infoPanelOpen = false
     this.imageTarget.onerror = () => {
       const image = this.imagesValue[this.indexValue]
       if (this.imageTarget.src !== image.original) {
@@ -23,7 +22,6 @@ export default class extends Controller {
     event.preventDefault()
     const index = parseInt(event.currentTarget.dataset.index)
     this.indexValue = index
-    this.infoPanelOpen = false
     this.show()
   }
 
@@ -42,7 +40,7 @@ export default class extends Controller {
       this.saveStatusTarget.textContent = ""
     }
 
-    // Update bottom info bar
+    // Update read-only display
     const hasTitle = image.title && image.title.trim()
     const hasCaption = image.caption && image.caption.trim()
     const hasAnyInfo = hasTitle || hasCaption
@@ -59,11 +57,6 @@ export default class extends Controller {
       this.noInfoTarget.classList.toggle("hidden", hasAnyInfo)
     }
 
-    // Update info panel state
-    if (this.hasInfoPanelTarget) {
-      this.infoPanelTarget.classList.toggle("translate-x-full", !this.infoPanelOpen)
-    }
-
     this.counterTarget.textContent = `${this.indexValue + 1} / ${this.imagesValue.length}`
     this.updateDownloadLinks(image)
 
@@ -72,14 +65,6 @@ export default class extends Controller {
 
     this.modalTarget.classList.remove("hidden")
     document.body.classList.add("overflow-hidden")
-  }
-
-  toggleInfo(event) {
-    event.stopPropagation()
-    this.infoPanelOpen = !this.infoPanelOpen
-    if (this.hasInfoPanelTarget) {
-      this.infoPanelTarget.classList.toggle("translate-x-full", !this.infoPanelOpen)
-    }
   }
 
   handleInput(event) {
@@ -114,6 +99,7 @@ export default class extends Controller {
       })
 
       if (response.ok) {
+        // Update local data
         this.imagesValue[this.indexValue].title = title
         this.imagesValue[this.indexValue].caption = caption
 
@@ -214,9 +200,6 @@ export default class extends Controller {
         break
       case "ArrowRight":
         this.next(event)
-        break
-      case "i":
-        this.toggleInfo(event)
         break
     }
   }

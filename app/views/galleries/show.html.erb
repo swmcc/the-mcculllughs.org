@@ -135,30 +135,20 @@
 
       <span data-lightbox-target="counter" class="text-white/70 text-sm"></span>
 
-      <div class="flex items-center space-x-2">
-        <!-- Info toggle - more prominent -->
-        <button data-action="click->lightbox#toggleInfo" class="flex items-center space-x-2 px-3 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors" title="Photo info (i)">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      <!-- Download -->
+      <div class="relative">
+        <button data-action="click->lightbox#toggleDownload" class="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>
-          <span class="text-white text-sm">Info</span>
         </button>
-
-        <!-- Download -->
-        <div class="relative">
-          <button data-action="click->lightbox#toggleDownload" class="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-            </svg>
-          </button>
-          <div data-lightbox-target="downloadMenu" class="hidden absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-lg overflow-hidden shadow-xl">
-          </div>
+        <div data-lightbox-target="downloadMenu" class="hidden absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-lg overflow-hidden shadow-xl">
         </div>
       </div>
     </div>
 
     <!-- Image area -->
-    <div class="absolute inset-0 flex items-center justify-center pt-16 pb-24" data-action="click->lightbox#stopPropagation">
+    <div class="absolute inset-0 flex items-center justify-center pt-16 pb-32" data-action="click->lightbox#stopPropagation">
       <button data-lightbox-target="prevBtn" data-action="click->lightbox#prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -174,65 +164,31 @@
       </button>
     </div>
 
-    <!-- Bottom info bar - always visible -->
+    <!-- Bottom info/edit bar -->
     <div class="absolute bottom-0 left-0 right-0 z-20" data-action="click->lightbox#stopPropagation">
-      <div class="bg-neutral-900/95 backdrop-blur border-t border-white/10 px-6 py-4">
+      <div class="bg-neutral-900 border-t border-white/10 px-6 py-4">
         <div class="max-w-3xl mx-auto">
-          <h3 data-lightbox-target="title" class="text-white font-medium text-lg"></h3>
-          <p data-lightbox-target="caption" class="text-white/70 text-sm mt-1"></p>
-          <p data-lightbox-target="noInfo" class="text-white/40 text-sm italic hidden">No title or caption</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Slide-out edit panel -->
-    <div data-lightbox-target="infoPanel"
-         data-action="click->lightbox#stopPropagation"
-         class="absolute top-0 right-0 bottom-0 w-96 bg-neutral-900 border-l border-white/10 transform translate-x-full transition-transform duration-200 ease-out z-30 overflow-y-auto">
-
-      <div class="p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-white font-medium">Edit Details</h3>
-          <button data-action="click->lightbox#toggleInfo" class="p-2 text-white/50 hover:text-white transition-colors rounded-lg hover:bg-white/10">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-
-        <% if can_edit %>
-          <div class="space-y-5">
-            <div>
-              <label class="block text-white/70 text-sm font-medium mb-2">Title</label>
-              <input type="text"
-                     data-lightbox-target="titleInput"
-                     data-action="input->lightbox#handleInput"
-                     placeholder="Add a title..."
-                     class="w-full bg-white/5 text-white rounded-lg px-4 py-3 border border-white/10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-white/30">
+          <% if can_edit %>
+            <!-- Editable mode -->
+            <input type="text"
+                   data-lightbox-target="titleInput"
+                   data-action="input->lightbox#handleInput"
+                   placeholder="Add a title..."
+                   class="w-full bg-transparent text-white text-lg font-medium border-none outline-none placeholder-white/30 mb-2">
+            <textarea data-lightbox-target="captionInput"
+                      data-action="input->lightbox#handleInput"
+                      placeholder="Tell the story behind this photo..."
+                      rows="2"
+                      class="w-full bg-transparent text-white/70 text-sm border-none outline-none placeholder-white/30 resize-none"></textarea>
+            <div class="mt-2">
+              <span data-lightbox-target="saveStatus" class="text-xs"></span>
             </div>
-
-            <div>
-              <label class="block text-white/70 text-sm font-medium mb-2">Caption</label>
-              <textarea data-lightbox-target="captionInput"
-                        data-action="input->lightbox#handleInput"
-                        placeholder="Tell the story behind this photo..."
-                        rows="5"
-                        class="w-full bg-white/5 text-white rounded-lg px-4 py-3 border border-white/10 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-white/30 resize-none"></textarea>
-            </div>
-
-            <div class="flex items-center justify-between pt-2">
-              <span data-lightbox-target="saveStatus" class="text-sm"></span>
-            </div>
-          </div>
-        <% else %>
-          <p class="text-white/50 text-sm">Only the gallery owner can edit photo details.</p>
-        <% end %>
-
-        <div class="mt-8 pt-6 border-t border-white/10">
-          <p class="text-white/40 text-xs">
-            Keyboard: <kbd class="px-1.5 py-0.5 bg-white/10 rounded text-white/60 mx-1">i</kbd> toggle panel
-            <kbd class="px-1.5 py-0.5 bg-white/10 rounded text-white/60 mx-1">←</kbd><kbd class="px-1.5 py-0.5 bg-white/10 rounded text-white/60">→</kbd> navigate
-          </p>
+          <% else %>
+            <!-- Read-only mode -->
+            <h3 data-lightbox-target="title" class="text-white text-lg font-medium"></h3>
+            <p data-lightbox-target="caption" class="text-white/70 text-sm mt-1"></p>
+            <p data-lightbox-target="noInfo" class="text-white/40 text-sm italic hidden">No title or caption</p>
+          <% end %>
         </div>
       </div>
     </div>
