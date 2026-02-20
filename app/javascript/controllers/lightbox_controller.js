@@ -7,6 +7,16 @@ export default class extends Controller {
     index: { type: Number, default: 0 }
   }
 
+  connect() {
+    // Add error handler for image loading
+    this.imageTarget.onerror = () => {
+      const image = this.imagesValue[this.indexValue]
+      if (this.imageTarget.src !== image.original) {
+        this.imageTarget.src = image.original
+      }
+    }
+  }
+
   open(event) {
     event.preventDefault()
     const index = parseInt(event.currentTarget.dataset.index)
@@ -16,7 +26,9 @@ export default class extends Controller {
 
   show() {
     const image = this.imagesValue[this.indexValue]
-    this.imageTarget.src = image.large
+
+    // Try large first, fallback to original
+    this.imageTarget.src = image.large || image.original
 
     // Update title and caption
     if (this.hasTitleTarget) {
@@ -53,7 +65,7 @@ export default class extends Controller {
       { name: "Large", url: image.large, desc: "2048px" },
       { name: "Medium", url: image.medium, desc: "1024px" },
       { name: "Small", url: image.small, desc: "640px" }
-    ]
+    ].filter(s => s.url)
 
     sizes.forEach(size => {
       const link = document.createElement("a")

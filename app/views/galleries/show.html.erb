@@ -4,10 +4,10 @@
       index: i,
       title: u.title,
       caption: u.caption,
-      original: rails_blob_url(u.file),
-      large: rails_representation_url(u.file.variant(resize_to_limit: [2048, 2048])),
-      medium: rails_representation_url(u.file.variant(resize_to_limit: [1024, 1024])),
-      small: rails_representation_url(u.file.variant(resize_to_limit: [640, 640]))
+      original: url_for(u.file),
+      large: url_for(u.file.variant(resize_to_limit: [2048, 2048])),
+      medium: url_for(u.file.variant(resize_to_limit: [1024, 1024])),
+      small: url_for(u.file.variant(resize_to_limit: [640, 640]))
     }
   end
 %>
