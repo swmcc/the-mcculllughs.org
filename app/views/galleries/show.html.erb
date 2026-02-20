@@ -1,4 +1,10 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<% images_data = @uploads.map.with_index { |u, i| { url: url_for(u.file), title: u.title, index: i } } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+     data-controller="lightbox"
+     data-lightbox-images-value="<%= images_data.to_json %>"
+     data-action="keydown@window->lightbox#keydown">
+
   <div class="mb-6">
     <%= link_to galleries_path, class: "inline-flex items-center text-sm text-white/60 hover:text-white transition-colors" do %>
       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,26 +42,30 @@
 
   <% if @uploads.any? %>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 mb-8">
-      <% @uploads.each do |upload| %>
-        <div id="<%= dom_id(upload) %>" class="group relative aspect-square bg-neutral-800 rounded-lg overflow-hidden" data-controller="photo-hover">
-          <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
-              class: "w-full h-full object-cover",
-              loading: "lazy",
-              alt: upload.title %>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <% @uploads.each_with_index do |upload, index| %>
+        <div id="<%= dom_id(upload) %>" class="group relative aspect-square bg-neutral-800 rounded-lg overflow-hidden">
+          <a href="#" data-action="click->lightbox#open" data-index="<%= index %>" class="block w-full h-full">
+            <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
+                class: "w-full h-full object-cover cursor-pointer",
+                loading: "lazy",
+                alt: upload.title %>
+          </a>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
             <div class="absolute bottom-0 left-0 right-0 p-3">
               <% if upload.title.present? %>
                 <p class="text-white text-xs font-medium mb-1"><%= upload.title %></p>
               <% end %>
               <div class="flex items-center justify-between">
                 <span class="text-white/70 text-xs"><%= time_ago_in_words(upload.created_at) %> ago</span>
-                <%= button_to upload_path(upload), method: :delete, data: { turbo_confirm: "Delete this photo?" }, class: "text-red-400 hover:text-red-300 transition-colors" do %>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                  </svg>
-                <% end %>
               </div>
             </div>
+          </div>
+          <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+            <%= button_to upload_path(upload), method: :delete, data: { turbo_confirm: "Delete this photo?" }, class: "p-1.5 bg-black/50 hover:bg-red-500/80 rounded-lg text-white transition-colors" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            <% end %>
           </div>
         </div>
       <% end %>
@@ -66,7 +76,6 @@
     <h2 class="text-lg font-medium text-white mb-4">Upload Photos</h2>
 
     <%= form_with model: @upload, url: gallery_uploads_path(@gallery), multipart: true, class: "space-y-4", data: { dropzone_target: "form" } do |form| %>
-      <!-- Drag and Drop Zone -->
       <div data-dropzone-target="dropzone"
            data-action="dragover->dropzone#dragover
                         dragenter->dropzone#dragenter
@@ -85,10 +94,8 @@
         <%= form.file_field :file, accept: "image/*,video/*", multiple: true, class: "hidden", data: { dropzone_target: "input", action: "change->dropzone#handleFileSelect" } %>
       </div>
 
-      <!-- Preview Area -->
       <div data-dropzone-target="preview" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
 
-      <!-- Upload Button (hidden by default) -->
       <button type="button" data-action="click->dropzone#upload" data-dropzone-upload class="hidden w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -96,5 +103,43 @@
         <span>Upload Photos</span>
       </button>
     <% end %>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div data-lightbox-target="modal"
+       data-action="click->lightbox#close"
+       class="hidden fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+
+    <!-- Close button -->
+    <button data-action="click->lightbox#close" class="absolute top-4 right-4 p-2 text-white/70 hover:text-white transition-colors">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+
+    <!-- Prev button -->
+    <button data-action="click->lightbox#prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <!-- Next button -->
+    <button data-action="click->lightbox#next" class="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/70 hover:text-white transition-colors">
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+
+    <!-- Image container -->
+    <div class="max-w-5xl max-h-[85vh] px-16" data-action="click->lightbox#stopPropagation">
+      <img data-lightbox-target="image" src="" alt="" class="max-w-full max-h-[85vh] object-contain">
+    </div>
+
+    <!-- Caption and counter -->
+    <div class="absolute bottom-4 left-0 right-0 text-center">
+      <p data-lightbox-target="caption" class="text-white text-sm mb-1"></p>
+      <p data-lightbox-target="counter" class="text-white/50 text-xs"></p>
+    </div>
   </div>
 </div>
