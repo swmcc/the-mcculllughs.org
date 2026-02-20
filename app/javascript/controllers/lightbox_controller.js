@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus", "noInfo"]
+  static targets = ["modal", "image", "title", "caption", "dateTaken", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "dateTakenInput", "saveStatus", "noInfo"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 },
@@ -36,8 +36,23 @@ export default class extends Controller {
     if (this.canEditValue && this.hasCaptionInputTarget) {
       this.captionInputTarget.value = image.caption || ""
     }
+    if (this.canEditValue && this.hasDateTakenInputTarget) {
+      this.dateTakenInputTarget.value = image.date_taken || ""
+    }
     if (this.hasSaveStatusTarget) {
       this.saveStatusTarget.textContent = ""
+    }
+
+    // Update read-only date display
+    if (this.hasDateTakenTarget) {
+      if (image.date_taken) {
+        const date = new Date(image.date_taken)
+        this.dateTakenTarget.textContent = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+        this.dateTakenTarget.classList.remove("hidden")
+      } else {
+        this.dateTakenTarget.textContent = ""
+        this.dateTakenTarget.classList.add("hidden")
+      }
     }
 
     // Update read-only display
@@ -82,6 +97,7 @@ export default class extends Controller {
     const image = this.imagesValue[this.indexValue]
     const title = this.hasTitleInputTarget ? this.titleInputTarget.value : image.title
     const caption = this.hasCaptionInputTarget ? this.captionInputTarget.value : image.caption
+    const date_taken = this.hasDateTakenInputTarget ? this.dateTakenInputTarget.value : image.date_taken
 
     if (this.hasSaveStatusTarget) {
       this.saveStatusTarget.textContent = "Saving..."
@@ -95,13 +111,13 @@ export default class extends Controller {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector("[name='csrf-token']").content
         },
-        body: JSON.stringify({ upload: { title, caption } })
+        body: JSON.stringify({ upload: { title, caption, date_taken } })
       })
 
       if (response.ok) {
         // Update local data (create new array to ensure Stimulus detects change)
         const images = [...this.imagesValue]
-        images[this.indexValue] = { ...images[this.indexValue], title, caption }
+        images[this.indexValue] = { ...images[this.indexValue], title, caption, date_taken }
         this.imagesValue = images
 
         // Update all UI elements for this upload
