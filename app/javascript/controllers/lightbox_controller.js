@@ -99,9 +99,10 @@ export default class extends Controller {
       })
 
       if (response.ok) {
-        // Update local data
-        this.imagesValue[this.indexValue].title = title
-        this.imagesValue[this.indexValue].caption = caption
+        // Update local data (create new array to ensure Stimulus detects change)
+        const images = [...this.imagesValue]
+        images[this.indexValue] = { ...images[this.indexValue], title, caption }
+        this.imagesValue = images
 
         // Update all UI elements for this upload
         this.updateUploadUI(image.id, title, caption)
