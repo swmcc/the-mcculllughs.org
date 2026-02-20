@@ -103,25 +103,8 @@ export default class extends Controller {
         this.imagesValue[this.indexValue].title = title
         this.imagesValue[this.indexValue].caption = caption
 
-        // Update the thumbnail overlay in the gallery grid
-        const uploadId = image.id
-        const thumbnailEl = document.getElementById(`upload_${uploadId}`)
-        if (thumbnailEl) {
-          const titleEl = thumbnailEl.querySelector('p.text-white.text-xs.font-medium')
-          if (titleEl) {
-            titleEl.textContent = title
-            titleEl.classList.toggle('hidden', !title)
-          } else if (title) {
-            // Create title element if it doesn't exist
-            const overlay = thumbnailEl.querySelector('.absolute.bottom-0')
-            if (overlay) {
-              const newTitle = document.createElement('p')
-              newTitle.className = 'text-white text-xs font-medium mb-1'
-              newTitle.textContent = title
-              overlay.insertBefore(newTitle, overlay.firstChild)
-            }
-          }
-        }
+        // Update all UI elements for this upload
+        this.updateUploadUI(image.id, title, caption)
 
         if (this.hasSaveStatusTarget) {
           this.saveStatusTarget.textContent = "Saved"
@@ -138,6 +121,21 @@ export default class extends Controller {
         this.saveStatusTarget.textContent = "Failed to save"
         this.saveStatusTarget.className = "text-red-400 text-xs"
       }
+    }
+  }
+
+  updateUploadUI(uploadId, title, caption) {
+    // Update thumbnail title overlay
+    const titleEl = document.querySelector(`[data-upload-title="${uploadId}"]`)
+    if (titleEl) {
+      titleEl.textContent = title || ""
+      titleEl.classList.toggle("hidden", !title)
+    }
+
+    // Update thumbnail image alt text
+    const imgEl = document.querySelector(`[data-upload-image="${uploadId}"]`)
+    if (imgEl) {
+      imgEl.alt = title || ""
     }
   }
 

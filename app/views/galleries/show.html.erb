@@ -63,13 +63,12 @@
             <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
                 class: "w-full h-full object-cover cursor-pointer",
                 loading: "lazy",
-                alt: upload.title %>
+                alt: upload.title,
+                data: { upload_image: upload.id } %>
           </a>
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-            <div class="absolute bottom-0 left-0 right-0 p-3">
-              <% if upload.title.present? %>
-                <p class="text-white text-xs font-medium mb-1"><%= upload.title %></p>
-              <% end %>
+            <div class="absolute bottom-0 left-0 right-0 p-3" data-upload-overlay="<%= upload.id %>">
+              <p class="text-white text-xs font-medium mb-1 <%= 'hidden' unless upload.title.present? %>" data-upload-title="<%= upload.id %>"><%= upload.title %></p>
               <div class="flex items-center justify-between">
                 <span class="text-white/70 text-xs"><%= time_ago_in_words(upload.created_at) %> ago</span>
               </div>
