@@ -1,14 +1,15 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn"]
+  static targets = ["modal", "image", "title", "caption", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "saveStatus"]
   static values = {
     images: Array,
-    index: { type: Number, default: 0 }
+    index: { type: Number, default: 0 },
+    canEdit: { type: Boolean, default: false }
   }
 
   connect() {
-    // Add error handler for image loading
+    this.saveTimeout = null
     this.imageTarget.onerror = () => {
       const image = this.imagesValue[this.indexValue]
       if (this.imageTarget.src !== image.original) {
@@ -26,34 +27,96 @@ export default class extends Controller {
 
   show() {
     const image = this.imagesValue[this.indexValue]
-
-    // Try large first, fallback to original
     this.imageTarget.src = image.large || image.original
 
-    // Update title and caption
+    // Update display elements
     if (this.hasTitleTarget) {
       this.titleTarget.textContent = image.title || ""
-      this.titleTarget.classList.toggle("hidden", !image.title)
+      this.titleTarget.classList.toggle("hidden", this.canEditValue || !image.title)
     }
 
     if (this.hasCaptionTarget) {
       this.captionTarget.textContent = image.caption || ""
-      this.captionTarget.classList.toggle("hidden", !image.caption)
+      this.captionTarget.classList.toggle("hidden", this.canEditValue || !image.caption)
     }
 
-    // Update counter
-    this.counterTarget.textContent = `${this.indexValue + 1} / ${this.imagesValue.length}`
+    // Update editable inputs
+    if (this.canEditValue) {
+      if (this.hasTitleInputTarget) {
+        this.titleInputTarget.value = image.title || ""
+        this.titleInputTarget.classList.remove("hidden")
+      }
+      if (this.hasCaptionInputTarget) {
+        this.captionInputTarget.value = image.caption || ""
+        this.captionInputTarget.classList.remove("hidden")
+      }
+      if (this.hasSaveStatusTarget) {
+        this.saveStatusTarget.textContent = ""
+      }
+    }
 
-    // Update download links
+    this.counterTarget.textContent = `${this.indexValue + 1} / ${this.imagesValue.length}`
     this.updateDownloadLinks(image)
 
-    // Update prev/next button visibility
     this.prevBtnTarget.classList.toggle("invisible", this.indexValue === 0)
     this.nextBtnTarget.classList.toggle("invisible", this.indexValue === this.imagesValue.length - 1)
 
-    // Show modal
     this.modalTarget.classList.remove("hidden")
     document.body.classList.add("overflow-hidden")
+  }
+
+  handleInput(event) {
+    if (!this.canEditValue) return
+
+    if (this.hasSaveStatusTarget) {
+      this.saveStatusTarget.textContent = ""
+    }
+
+    clearTimeout(this.saveTimeout)
+    this.saveTimeout = setTimeout(() => this.save(), 800)
+  }
+
+  async save() {
+    const image = this.imagesValue[this.indexValue]
+    const title = this.hasTitleInputTarget ? this.titleInputTarget.value : image.title
+    const caption = this.hasCaptionInputTarget ? this.captionInputTarget.value : image.caption
+
+    if (this.hasSaveStatusTarget) {
+      this.saveStatusTarget.textContent = "Saving..."
+      this.saveStatusTarget.className = "text-white/50 text-xs"
+    }
+
+    try {
+      const response = await fetch(`/uploads/${image.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name='csrf-token']").content
+        },
+        body: JSON.stringify({ upload: { title, caption } })
+      })
+
+      if (response.ok) {
+        // Update local data
+        this.imagesValue[this.indexValue].title = title
+        this.imagesValue[this.indexValue].caption = caption
+
+        if (this.hasSaveStatusTarget) {
+          this.saveStatusTarget.textContent = "Saved"
+          this.saveStatusTarget.className = "text-green-400 text-xs"
+          setTimeout(() => {
+            if (this.hasSaveStatusTarget) this.saveStatusTarget.textContent = ""
+          }, 2000)
+        }
+      } else {
+        throw new Error("Save failed")
+      }
+    } catch (error) {
+      if (this.hasSaveStatusTarget) {
+        this.saveStatusTarget.textContent = "Failed to save"
+        this.saveStatusTarget.className = "text-red-400 text-xs"
+      }
+    }
   }
 
   updateDownloadLinks(image) {
@@ -118,6 +181,14 @@ export default class extends Controller {
 
   keydown(event) {
     if (this.modalTarget.classList.contains("hidden")) return
+
+    // Don't handle keys if user is typing in input
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA") {
+      if (event.key === "Escape") {
+        event.target.blur()
+      }
+      return
+    }
 
     switch (event.key) {
       case "Escape":

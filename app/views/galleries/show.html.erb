@@ -1,6 +1,8 @@
 <%
+  can_edit = current_user&.admin? || @gallery.user == current_user
   images_data = @uploads.map.with_index do |u, i|
     {
+      id: u.id,
       index: i,
       title: u.title,
       caption: u.caption,
@@ -15,6 +17,7 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
      data-controller="lightbox"
      data-lightbox-images-value="<%= images_data.to_json %>"
+     data-lightbox-can-edit-value="<%= can_edit %>"
      data-action="keydown@window->lightbox#keydown">
 
   <div class="mb-6">
@@ -136,7 +139,6 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
           </svg>
         </button>
-        <!-- Download dropdown -->
         <div data-lightbox-target="downloadMenu" class="hidden absolute top-full right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-lg overflow-hidden shadow-xl">
         </div>
       </div>
@@ -144,17 +146,14 @@
 
     <!-- Image area -->
     <div class="absolute inset-0 flex items-center justify-center" data-action="click->lightbox#stopPropagation">
-      <!-- Prev button -->
       <button data-lightbox-target="prevBtn" data-action="click->lightbox#prev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
       </button>
 
-      <!-- Image -->
       <img data-lightbox-target="image" src="" alt="" class="max-w-[90vw] max-h-[80vh] object-contain">
 
-      <!-- Next button -->
       <button data-lightbox-target="nextBtn" data-action="click->lightbox#next" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -164,9 +163,27 @@
 
     <!-- Bottom bar with title/caption -->
     <div class="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent z-20" data-action="click->lightbox#stopPropagation">
-      <div class="max-w-3xl mx-auto text-center">
-        <h3 data-lightbox-target="title" class="text-white font-medium mb-1"></h3>
-        <p data-lightbox-target="caption" class="text-white/70 text-sm"></p>
+      <div class="max-w-xl mx-auto">
+        <% if can_edit %>
+          <!-- Editable mode -->
+          <input type="text"
+                 data-lightbox-target="titleInput"
+                 data-action="input->lightbox#handleInput"
+                 placeholder="Add a title..."
+                 class="w-full bg-transparent text-white font-medium text-center border-none outline-none placeholder-white/30 mb-2">
+          <textarea data-lightbox-target="captionInput"
+                    data-action="input->lightbox#handleInput"
+                    placeholder="Add a caption or story about this photo..."
+                    rows="2"
+                    class="w-full bg-transparent text-white/70 text-sm text-center border-none outline-none placeholder-white/30 resize-none"></textarea>
+          <div class="text-center mt-1">
+            <span data-lightbox-target="saveStatus" class="text-xs"></span>
+          </div>
+        <% else %>
+          <!-- Read-only mode -->
+          <h3 data-lightbox-target="title" class="text-white font-medium text-center mb-1"></h3>
+          <p data-lightbox-target="caption" class="text-white/70 text-sm text-center"></p>
+        <% end %>
       </div>
     </div>
   </div>

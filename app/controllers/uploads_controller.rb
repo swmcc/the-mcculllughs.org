@@ -1,6 +1,7 @@
 class UploadsController < ApplicationController
   before_action :set_gallery, only: [ :create ]
-  before_action :set_upload, only: [ :destroy ]
+  before_action :set_upload, only: [ :update, :destroy ]
+  before_action :authorize_edit!, only: [ :update ]
 
   def create
     # Handle multiple file uploads
@@ -42,6 +43,14 @@ class UploadsController < ApplicationController
     end
   end
 
+  def update
+    if @upload.update(upload_params)
+      render json: { success: true, title: @upload.title, caption: @upload.caption }
+    else
+      render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     gallery = @upload.gallery
 
@@ -54,6 +63,12 @@ class UploadsController < ApplicationController
   end
 
   private
+
+  def authorize_edit!
+    unless current_user&.admin? || @upload.gallery.user == current_user
+      render json: { error: "Not authorized" }, status: :forbidden
+    end
+  end
 
   def set_gallery
     @gallery = Gallery.find(params[:gallery_id])

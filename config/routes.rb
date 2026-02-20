@@ -9,8 +9,8 @@ Rails.application.routes.draw do
     resources :uploads, only: [ :create ]
   end
 
-  # Uploads (for destroy action outside nested route)
-  resources :uploads, only: [ :destroy ]
+  # Uploads (for update/destroy actions outside nested route)
+  resources :uploads, only: [ :update, :destroy ]
 
   # Admin namespace
   namespace :admin do
