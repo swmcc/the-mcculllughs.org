@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "saveModal", "saveTitleInput", "saveDescriptionInput", "saveIntervalInput", "startBtn", "audio", "audioToggle", "audioIcon"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "saveModal", "saveTitleInput", "saveDescriptionInput", "saveIntervalInput", "saveAudioInput", "startBtn", "audio", "audioToggle", "audioIcon"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 },
@@ -395,23 +395,29 @@ export default class extends Controller {
       return
     }
 
-    const data = {
-      slideshow: {
-        title: title,
-        description: this.saveDescriptionInputTarget.value.trim(),
-        interval: parseInt(this.saveIntervalInputTarget.value) || 5
-      },
-      upload_ids: this.imagesValue.map(img => img.id)
+    // Use FormData for file upload support
+    const formData = new FormData()
+    formData.append('slideshow[title]', title)
+    formData.append('slideshow[description]', this.saveDescriptionInputTarget.value.trim())
+    formData.append('slideshow[interval]', parseInt(this.saveIntervalInputTarget.value) || 5)
+
+    // Add audio file if selected
+    if (this.hasSaveAudioInputTarget && this.saveAudioInputTarget.files[0]) {
+      formData.append('slideshow[audio]', this.saveAudioInputTarget.files[0])
     }
+
+    // Add upload IDs
+    this.imagesValue.forEach(img => {
+      formData.append('upload_ids[]', img.id)
+    })
 
     try {
       const response = await fetch('/slideshows', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
         },
-        body: JSON.stringify(data)
+        body: formData
       })
 
       if (response.ok) {
