@@ -52,17 +52,40 @@ export default class extends Controller {
   }
 
   showTitleSlide() {
+    const wasShowingImage = !this.imageAreaTarget.classList.contains("hidden")
+
     // Populate title slide content
     this.galleryTitleTarget.textContent = this.galleryTitleValue || "Untitled Album"
     this.galleryDescriptionTarget.textContent = this.galleryDescriptionValue || ""
     this.photoCountTarget.textContent = `${this.imagesValue.length} photos`
-
-    // Show title slide, hide image area and info bar
-    this.titleSlideTarget.classList.remove("hidden")
-    this.imageAreaTarget.classList.add("hidden")
-    if (this.hasInfoBarTarget) this.infoBarTarget.classList.add("hidden")
-
     this.counterTarget.textContent = ""
+
+    // If coming from image, fade out image first then show title
+    if (wasShowingImage) {
+      this.imageTarget.style.transition = "opacity 0.3s ease"
+      this.imageTarget.style.opacity = "0"
+      setTimeout(() => {
+        this.imageAreaTarget.classList.add("hidden")
+        if (this.hasInfoBarTarget) this.infoBarTarget.classList.add("hidden")
+        this.imageTarget.style.transition = ""
+
+        // Fade in title slide
+        this.titleSlideTarget.style.opacity = "0"
+        this.titleSlideTarget.classList.remove("hidden")
+        setTimeout(() => {
+          this.titleSlideTarget.style.transition = "opacity 0.5s ease"
+          this.titleSlideTarget.style.opacity = "1"
+          setTimeout(() => {
+            this.titleSlideTarget.style.transition = ""
+          }, 500)
+        }, 50)
+      }, 300)
+    } else {
+      // Initial show - no transition needed
+      this.titleSlideTarget.classList.remove("hidden")
+      this.imageAreaTarget.classList.add("hidden")
+      if (this.hasInfoBarTarget) this.infoBarTarget.classList.add("hidden")
+    }
   }
 
   showSlideshow() {
@@ -87,10 +110,32 @@ export default class extends Controller {
     const img = this.imagesValue[this.currentIndex]
     if (!img) return
 
+    const wasOnTitleSlide = !this.titleSlideTarget.classList.contains("hidden")
+
     // Hide title slide, show image area and info bar
     this.titleSlideTarget.classList.add("hidden")
     this.imageAreaTarget.classList.remove("hidden")
     if (this.hasInfoBarTarget) this.infoBarTarget.classList.remove("hidden")
+
+    // Update photo info
+    this.titleTarget.textContent = img.title || ""
+    this.captionTarget.textContent = img.caption || ""
+    this.dateTakenTarget.textContent = img.date_taken ? this.formatDate(img.date_taken) : ""
+    this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`
+
+    // Coming from title slide - just fade in the first image
+    if (wasOnTitleSlide) {
+      this.imageTarget.style.opacity = "0"
+      this.imageTarget.src = img.large || img.medium || img.original
+      this.imageTarget.onload = () => {
+        this.imageTarget.style.transition = "opacity 0.5s ease"
+        this.imageTarget.style.opacity = "1"
+        setTimeout(() => {
+          this.imageTarget.style.transition = ""
+        }, 500)
+      }
+      return
+    }
 
     if (withTransition) {
       this.applyTransition(() => {
@@ -99,12 +144,6 @@ export default class extends Controller {
     } else {
       this.imageTarget.src = img.large || img.medium || img.original
     }
-    this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`
-
-    // Update photo info
-    this.titleTarget.textContent = img.title || ""
-    this.captionTarget.textContent = img.caption || ""
-    this.dateTakenTarget.textContent = img.date_taken ? this.formatDate(img.date_taken) : ""
   }
 
   formatDate(dateStr) {
