@@ -49,9 +49,14 @@ class SearchService
   end
 
   def base_scope
-    Upload.joins(:gallery)
-          .where(galleries: { user_id: user.id })
-          .includes(:gallery, file_attachment: :blob)
+    scope = Upload.joins(:gallery).includes(:gallery, file_attachment: :blob)
+
+    # Admins can search all uploads, regular users only their own
+    if user.admin?
+      scope
+    else
+      scope.where(galleries: { user_id: user.id })
+    end
   end
 
   def sanitize_like(string)
