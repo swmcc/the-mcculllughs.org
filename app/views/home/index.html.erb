@@ -1,8 +1,8 @@
 <%
   # Split photos into rows for animation
   photos = @public_photos.to_a
-  row_size = (photos.size / 4.0).ceil
-  rows = photos.each_slice(row_size).to_a
+  row_size = [(photos.size / 4.0).ceil, 1].max
+  rows = photos.any? ? photos.each_slice(row_size).to_a : []
 %>
 
 <div class="min-h-screen bg-neutral-900 flex flex-col overflow-hidden">
