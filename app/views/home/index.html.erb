@@ -1,37 +1,67 @@
 <%
-  # Calculate grid - aim for ~60px thumbnails
-  total_cells = 200
-  photo_count = @public_photos.size
-  empty_count = [total_cells - photo_count, 0].max
+  # Split photos into rows for animation
+  photos = @public_photos.to_a
+  row_size = (photos.size / 4.0).ceil
+  rows = photos.each_slice(row_size).to_a
 %>
 
-<div class="min-h-screen flex flex-col">
-  <!-- Photo grid with overlay -->
-  <div class="relative flex-1 min-h-[80vh]">
-    <div class="absolute inset-0 grid grid-cols-8 sm:grid-cols-10 md:grid-cols-12 lg:grid-cols-[repeat(16,minmax(0,1fr))] xl:grid-cols-[repeat(20,minmax(0,1fr))] auto-rows-fr">
-      <% @public_photos.each do |photo| %>
-        <%= link_to public_photo_path(photo.short_code), class: "block overflow-hidden hover:opacity-80 transition-opacity" do %>
-          <%= image_tag public_thumbnail_path(photo.short_code),
-              class: "w-full h-full object-cover",
-              loading: "lazy" %>
+<div class="min-h-screen bg-neutral-900 flex flex-col overflow-hidden">
+  <!-- Hero section -->
+  <div class="relative z-10 flex items-center justify-center py-16 sm:py-24">
+    <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl px-8 sm:px-12 py-8 sm:py-10 text-center mx-4">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-800 mb-2">the-mcculloughs.org</h1>
+      <p class="text-neutral-500 text-sm sm:text-base mb-6">1933 – <%= Date.current.year %></p>
+      <%= link_to "Sign In", new_user_session_path,
+          class: "inline-block px-8 py-3 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium rounded-xl transition-colors shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all" %>
+    </div>
+  </div>
+
+  <!-- Animated photo rows -->
+  <div class="flex-1 flex flex-col justify-center gap-2 py-8">
+    <% rows.each_with_index do |row_photos, index| %>
+      <% direction = index.even? ? 'left' : 'right' %>
+      <div class="photo-row photo-row-<%= direction %> flex gap-2">
+        <% 2.times do %>
+          <% row_photos.each do |photo| %>
+            <%= link_to public_photo_path(photo.short_code), class: "flex-shrink-0 block overflow-hidden rounded-lg hover:scale-105 transition-transform duration-300" do %>
+              <%= image_tag public_thumbnail_path(photo.short_code),
+                  class: "w-20 h-20 sm:w-24 sm:h-24 object-cover",
+                  loading: "eager",
+                  decoding: "async" %>
+            <% end %>
+          <% end %>
         <% end %>
-      <% end %>
-
-      <% empty_count.times do %>
-        <div class="bg-neutral-100"></div>
-      <% end %>
-    </div>
-
-    <!-- Centered overlay with title and login -->
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-      <div class="text-center pointer-events-auto">
-        <h1 class="text-4xl sm:text-5xl font-bold text-neutral-800 mb-2 drop-shadow-sm">The McCulloughs</h1>
-        <p class="text-neutral-500 mb-6">Family photos</p>
-        <%= link_to "Sign In", new_user_session_path,
-            class: "inline-block px-6 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-medium rounded-lg transition-colors shadow-lg" %>
       </div>
-    </div>
+    <% end %>
   </div>
 
   <%= render "shared/footer" %>
 </div>
+
+<style>
+  .photo-row {
+    width: max-content;
+  }
+
+  .photo-row-left {
+    animation: scroll-left 60s linear infinite;
+  }
+
+  .photo-row-right {
+    animation: scroll-right 60s linear infinite;
+  }
+
+  @keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes scroll-right {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+
+  .photo-row:hover {
+    animation-play-state: paused;
+  }
+</style>
