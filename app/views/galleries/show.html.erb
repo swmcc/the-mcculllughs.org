@@ -1,6 +1,6 @@
 <%
   can_edit = current_user&.admin? || @gallery.user == current_user
-  images_data = @uploads.map.with_index do |u, i|
+  images_data = @uploads.select { |u| u.file.attached? }.map.with_index do |u, i|
     {
       id: u.id,
       index: i,
@@ -10,9 +10,9 @@
       is_public: u.is_public,
       short_code: u.short_code,
       original: url_for(u.file),
-      large: url_for(u.file.variant(resize_to_limit: [2048, 2048])),
-      medium: url_for(u.file.variant(resize_to_limit: [1024, 1024])),
-      small: url_for(u.file.variant(resize_to_limit: [640, 640]))
+      thumb: upload_variant_url(u, :thumb),
+      medium: upload_variant_url(u, :medium),
+      large: upload_variant_url(u, :large)
     }
   end
 %>
@@ -65,7 +65,7 @@
       <% @uploads.each_with_index do |upload, index| %>
         <div id="<%= dom_id(upload) %>" class="group relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <a href="#" data-action="click->lightbox#open" data-index="<%= index %>" class="block w-full h-full">
-            <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
+            <%= image_tag upload_variant_url(upload, :thumb),
                 class: "w-full h-full object-cover cursor-pointer",
                 loading: "lazy",
                 alt: upload.title,

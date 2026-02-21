@@ -1,13 +1,21 @@
+# frozen_string_literal: true
+
 class ProcessMediaJob < ApplicationJob
   queue_as :default
 
-  def perform(upload_id)
-    upload = Upload.find(upload_id)
-    return unless upload.file.attached?
+  # Standard variant sizes for the app
+  VARIANTS = {
+    thumb: { resize_to_fill: [ 400, 400 ] },
+    medium: { resize_to_limit: [ 1024, 1024 ] },
+    large: { resize_to_limit: [ 2048, 2048 ] }
+  }.freeze
 
-    # Generate thumbnail based on content type
+  def perform(upload_id)
+    upload = Upload.find_by(id: upload_id)
+    return unless upload&.file&.attached?
+
     if upload.file.content_type.start_with?("image/")
-      process_image(upload)
+      generate_variants(upload)
     elsif upload.file.content_type.start_with?("video/")
       process_video(upload)
     end
@@ -15,26 +23,19 @@ class ProcessMediaJob < ApplicationJob
 
   private
 
-  def process_image(upload)
-    # Generate thumbnail for images
-    upload.file.open do |file|
-      thumbnail = ImageProcessing::MiniMagick
-        .source(file)
-        .resize_to_limit(400, 400)
-        .call
-
-      upload.thumbnail.attach(
-        io: File.open(thumbnail.path),
-        filename: "thumb_#{upload.file.filename}",
-        content_type: upload.file.content_type
-      )
+  def generate_variants(upload)
+    VARIANTS.each do |name, options|
+      # This triggers variant generation and stores it
+      upload.file.variant(options).processed
+      Rails.logger.info "Generated #{name} variant for upload #{upload.id}"
+    rescue StandardError => e
+      Rails.logger.error "Failed to generate #{name} variant for upload #{upload.id}: #{e.message}"
     end
   end
 
   def process_video(upload)
     # For videos, we could extract a frame for thumbnail
     # This is a placeholder - you'd need ffmpeg or similar
-    # For now, just log that we'd process it
     Rails.logger.info "Video processing for upload #{upload.id} would happen here"
   end
 end
