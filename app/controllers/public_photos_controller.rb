@@ -2,6 +2,14 @@ class PublicPhotosController < ApplicationController
   skip_before_action :authenticate_user!
   before_action :set_upload
 
+  # GET /t/:short_code - just the thumbnail image
+  def thumbnail
+    raise ActiveRecord::RecordNotFound unless @upload.is_public?
+
+    redirect_to url_for(@upload.file.variant(resize_to_fill: [ 80, 80 ])), allow_other_host: true
+  end
+
+  # GET /p/:short_code - full photo page
   def show
     unless @upload.is_public? || can_edit?
       raise ActiveRecord::RecordNotFound

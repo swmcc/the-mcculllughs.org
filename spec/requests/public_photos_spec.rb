@@ -4,6 +4,28 @@ RSpec.describe "PublicPhotos", type: :request do
   let(:user) { create(:user) }
   let(:gallery) { create(:gallery, user: user) }
 
+  describe "GET /t/:short_code (thumbnail)" do
+    context "when upload is public" do
+      it "redirects to the thumbnail image" do
+        upload = create(:upload, user: user, gallery: gallery, is_public: true)
+
+        get "/t/#{upload.short_code}"
+
+        expect(response).to have_http_status(:redirect)
+      end
+    end
+
+    context "when upload is private" do
+      it "returns 404" do
+        upload = create(:upload, user: user, gallery: gallery, is_public: false)
+
+        get "/t/#{upload.short_code}"
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
   describe "GET /p/:short_code" do
     context "when upload is public" do
       it "displays the photo" do

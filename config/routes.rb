@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   resources :uploads, only: [ :update, :destroy ]
 
   # Public photo sharing (no auth required)
+  get "t/:short_code", to: "public_photos#thumbnail", as: :public_thumbnail
   get "p/:short_code", to: "public_photos#show", as: :public_photo
   patch "p/:short_code", to: "public_photos#update"
 
