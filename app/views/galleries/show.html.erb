@@ -498,40 +498,40 @@
 </div>
 
 <style>
-  /* Slideshow transitions */
+  /* Slideshow transitions - smooth and gentle */
   [data-slideshow-target="image"] {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
   }
 
-  /* Fade */
-  .fade-out { opacity: 0; }
-  .fade-in { animation: fadeIn 0.5s ease forwards; }
+  /* Fade - gentle crossfade */
+  .fade-out { opacity: 0; transition: opacity 0.6s ease-in-out; }
+  .fade-in { animation: fadeIn 1s ease-in-out forwards; }
   @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
   }
 
-  /* Slide left */
-  .slide-out-left { transform: translateX(-100%); opacity: 0; }
-  .slide-in-left { animation: slideInLeft 0.5s ease forwards; }
+  /* Slide left - smooth glide */
+  .slide-out-left { transform: translateX(-30%); opacity: 0; transition: all 0.6s ease-in-out; }
+  .slide-in-left { animation: slideInLeft 1s ease-in-out forwards; }
   @keyframes slideInLeft {
-    from { transform: translateX(100%); opacity: 0; }
+    from { transform: translateX(30%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
   }
 
-  /* Slide right */
-  .slide-out-right { transform: translateX(100%); opacity: 0; }
-  .slide-in-right { animation: slideInRight 0.5s ease forwards; }
+  /* Slide right - smooth glide */
+  .slide-out-right { transform: translateX(30%); opacity: 0; transition: all 0.6s ease-in-out; }
+  .slide-in-right { animation: slideInRight 1s ease-in-out forwards; }
   @keyframes slideInRight {
-    from { transform: translateX(-100%); opacity: 0; }
+    from { transform: translateX(-30%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
   }
 
-  /* Zoom */
-  .zoom-out { transform: scale(0.8); opacity: 0; }
-  .zoom-in { animation: zoomIn 0.5s ease forwards; }
+  /* Zoom - subtle scale */
+  .zoom-out { transform: scale(0.95); opacity: 0; transition: all 0.6s ease-in-out; }
+  .zoom-in { animation: zoomIn 1s ease-in-out forwards; }
   @keyframes zoomIn {
-    from { transform: scale(1.2); opacity: 0; }
+    from { transform: scale(1.05); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
   }
 </style>

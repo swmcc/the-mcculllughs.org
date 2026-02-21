@@ -142,7 +142,8 @@ export default class extends Controller {
     const match = url.match(/open\.spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/)
     if (match) {
       const autoplayParam = autoplay ? "&autoplay=1" : ""
-      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0${autoplayParam}`
+      // loop=1 makes the track repeat when it ends
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0&loop=1${autoplayParam}`
     }
     return null
   }
@@ -390,29 +391,43 @@ export default class extends Controller {
 
     // After exit animation, load new image and apply enter animation
     setTimeout(() => {
-      loadNewImage()
+      // Hide image completely while loading new src
+      img.style.visibility = "hidden"
       img.classList.remove("fade-out", "slide-out-left", "slide-out-right", "zoom-out")
 
-      switch (transition) {
-        case "fade":
-          img.classList.add("fade-in")
-          break
-        case "slide-left":
-          img.classList.add("slide-in-left")
-          break
-        case "slide-right":
-          img.classList.add("slide-in-right")
-          break
-        case "zoom":
-          img.classList.add("zoom-in")
-          break
+      loadNewImage()
+
+      // Wait for image to load, then animate in
+      const onImageReady = () => {
+        img.style.visibility = "visible"
+        switch (transition) {
+          case "fade":
+            img.classList.add("fade-in")
+            break
+          case "slide-left":
+            img.classList.add("slide-in-left")
+            break
+          case "slide-right":
+            img.classList.add("slide-in-right")
+            break
+          case "zoom":
+            img.classList.add("zoom-in")
+            break
+        }
+
+        // Clean up after animation completes
+        setTimeout(() => {
+          img.classList.remove("fade-in", "slide-in-left", "slide-in-right", "zoom-in")
+        }, 1000)
       }
 
-      // Clean up after animation completes
-      setTimeout(() => {
-        img.classList.remove("fade-in", "slide-in-left", "slide-in-right", "zoom-in")
-      }, 500)
-    }, 300)
+      img.onload = onImageReady
+
+      // Fallback if image already cached (onload may not fire)
+      if (img.complete) {
+        onImageReady()
+      }
+    }, 600)
   }
 
   next() {
