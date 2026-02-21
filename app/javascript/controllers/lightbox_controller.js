@@ -170,7 +170,7 @@ export default class extends Controller {
       { name: "Original", url: image.original },
       { name: "Large", url: image.large, desc: "2048px" },
       { name: "Medium", url: image.medium, desc: "1024px" },
-      { name: "Small", url: image.small, desc: "640px" }
+      { name: "Thumbnail", url: image.thumb, desc: "400px" }
     ].filter(s => s.url)
 
     sizes.forEach(size => {

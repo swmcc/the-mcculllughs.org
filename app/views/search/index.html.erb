@@ -1,6 +1,5 @@
 <%
-  images_data = @results.to_a.map.with_index do |u, i|
-    next unless u.file.attached?
+  images_data = @results.to_a.select { |u| u.file.attached? }.map.with_index do |u, i|
     {
       id: u.id,
       index: i,
@@ -9,9 +8,12 @@
       date_taken: u.date_taken&.to_s,
       gallery_title: u.gallery.title,
       gallery_path: gallery_path(u.gallery, anchor: dom_id(u)),
-      original: url_for(u.file)
+      original: url_for(u.file),
+      thumb: upload_variant_url(u, :thumb),
+      medium: upload_variant_url(u, :medium),
+      large: upload_variant_url(u, :large)
     }
-  end.compact
+  end
 %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
@@ -57,7 +59,7 @@
         <% next unless upload.file.attached? %>
         <a href="#" data-action="click->search-lightbox#open" data-index="<%= index %>" class="group block">
           <div class="relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-            <%= image_tag url_for(upload.file),
+            <%= image_tag upload_variant_url(upload, :thumb),
                 class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
                 loading: "lazy",
                 alt: upload.title %>
