@@ -156,12 +156,15 @@ module ImportProviders
     end
 
     def extract_title(photo_data)
-      title = photo_data.dig("title", "_content") || photo_data["title"]
+      title = photo_data["title"]
+      title = title["_content"] if title.is_a?(Hash)
       title.presence || "Untitled"
     end
 
     def extract_description(photo_data)
-      photo_data.dig("description", "_content") || photo_data["description"]
+      desc = photo_data["description"]
+      desc = desc["_content"] if desc.is_a?(Hash)
+      desc.presence
     end
 
     def parse_date_taken(photo_data)

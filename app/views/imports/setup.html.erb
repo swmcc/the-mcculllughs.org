@@ -29,7 +29,7 @@
       </ol>
     </div>
 
-    <%= form_tag connect_imports_path(@provider_name), method: :get, class: "space-y-4" do %>
+    <%= form_tag connect_imports_path(@provider_name), method: :get, class: "space-y-4", data: { turbo: false } do %>
       <div>
         <label for="api_key" class="block text-sm font-medium text-neutral-700 mb-1">API Key</label>
         <%= text_field_tag :api_key, @connection.api_key,
