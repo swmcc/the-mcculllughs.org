@@ -35,7 +35,8 @@ export default class extends Controller {
   setupSpotifyFromUrl() {
     if (!this.spotifyUrlValue) return
 
-    const embedUrl = this.convertToSpotifyEmbed(this.spotifyUrlValue)
+    // Use autoplay for saved slideshows
+    const embedUrl = this.convertToSpotifyEmbed(this.spotifyUrlValue, true)
     if (!embedUrl) return
 
     this.spotifyPlayerTarget.innerHTML = `
@@ -122,14 +123,15 @@ export default class extends Controller {
     this.spotifyVisible = true
   }
 
-  convertToSpotifyEmbed(url) {
+  convertToSpotifyEmbed(url, autoplay = false) {
     // Convert Spotify URLs to embed format
     // https://open.spotify.com/playlist/ABC -> https://open.spotify.com/embed/playlist/ABC
     // https://open.spotify.com/album/ABC -> https://open.spotify.com/embed/album/ABC
     // https://open.spotify.com/track/ABC -> https://open.spotify.com/embed/track/ABC
     const match = url.match(/open\.spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/)
     if (match) {
-      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`
+      const autoplayParam = autoplay ? "&autoplay=1" : ""
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0${autoplayParam}`
     }
     return null
   }
