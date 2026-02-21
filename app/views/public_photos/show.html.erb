@@ -1,0 +1,55 @@
+<% content_for :head do %>
+  <!-- Social Media Meta Tags -->
+  <meta property="og:title" content="<%= @upload.title.presence || 'Shared Photo' %>">
+  <meta property="og:description" content="<%= @upload.caption.presence || 'A photo shared from The McCulloughs' %>">
+  <meta property="og:image" content="<%= url_for(@upload.file.variant(resize_to_limit: [1200, 630])) %>">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+<% end %>
+
+<div class="min-h-screen bg-black flex flex-col">
+  <!-- Header -->
+  <div class="p-4 flex items-center justify-between">
+    <%= link_to root_path, class: "text-white/70 hover:text-white transition-colors" do %>
+      <span class="text-sm">The McCulloughs</span>
+    <% end %>
+
+    <div class="flex items-center space-x-3">
+      <% if @upload.date_taken.present? %>
+        <span class="text-white/50 text-sm">
+          <%= @upload.date_taken.strftime("%d %b %Y") %>
+        </span>
+      <% end %>
+
+      <%= link_to url_for(@upload.file), download: "", class: "p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors", title: "Download" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Photo -->
+  <div class="flex-1 flex items-center justify-center p-4">
+    <%= image_tag @upload.file.variant(resize_to_limit: [1920, 1080]),
+        class: "max-w-full max-h-[80vh] object-contain",
+        alt: @upload.title %>
+  </div>
+
+  <!-- Info -->
+  <div class="p-6 bg-neutral-900 border-t border-white/10">
+    <div class="max-w-3xl mx-auto">
+      <% if @upload.title.present? %>
+        <h1 class="text-white text-xl font-medium mb-2"><%= @upload.title %></h1>
+      <% end %>
+
+      <% if @upload.caption.present? %>
+        <p class="text-white/70"><%= @upload.caption %></p>
+      <% end %>
+
+      <% if @upload.title.blank? && @upload.caption.blank? %>
+        <p class="text-white/40 italic">Shared photo</p>
+      <% end %>
+    </div>
+  </div>
+</div>

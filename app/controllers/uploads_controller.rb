@@ -45,7 +45,14 @@ class UploadsController < ApplicationController
 
   def update
     if @upload.update(upload_params)
-      render json: { success: true, title: @upload.title, caption: @upload.caption }
+      render json: {
+        success: true,
+        title: @upload.title,
+        caption: @upload.caption,
+        date_taken: @upload.date_taken&.to_s,
+        is_public: @upload.is_public,
+        short_code: @upload.short_code
+      }
     else
       render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_entity
     end
@@ -79,6 +86,6 @@ class UploadsController < ApplicationController
   end
 
   def upload_params
-    params.require(:upload).permit(:title, :caption, :file, :date_taken)
+    params.require(:upload).permit(:title, :caption, :file, :date_taken, :is_public)
   end
 end
