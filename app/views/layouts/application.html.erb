@@ -60,11 +60,6 @@
                   <%= link_to edit_user_registration_path, class: "block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
                     Settings
                   <% end %>
-                  <% if current_user.admin? %>
-                    <%= link_to admin_root_path, class: "block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
-                      Admin
-                    <% end %>
-                  <% end %>
                   <div class="border-t border-white/10 my-1"></div>
                   <%= button_to destroy_user_session_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
                     Sign Out
