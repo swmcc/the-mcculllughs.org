@@ -7,6 +7,10 @@ class User < ApplicationRecord
   # Roles
   enum :role, { member: 0, admin: 1 }, default: :member
 
+  # Encrypted credentials
+  encrypts :spotify_client_id
+  encrypts :spotify_client_secret
+
   # Validations
   validates :name, presence: true
   validates :role, presence: true
@@ -24,5 +28,9 @@ class User < ApplicationRecord
 
   def connection_for(provider)
     external_connections.for_provider(provider).first
+  end
+
+  def spotify_configured?
+    spotify_client_id.present? && spotify_client_secret.present?
   end
 end
