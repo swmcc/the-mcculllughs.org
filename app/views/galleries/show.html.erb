@@ -22,6 +22,8 @@
      data-lightbox-images-value="<%= images_data.to_json %>"
      data-lightbox-can-edit-value="<%= can_edit %>"
      data-slideshow-images-value="<%= images_data.to_json %>"
+     data-slideshow-gallery-title-value="<%= @gallery.title %>"
+     data-slideshow-gallery-description-value="<%= @gallery.description %>"
      data-action="keydown@window->lightbox#keydown keydown@window->slideshow#keydown">
 
   <div class="mb-6">
@@ -284,8 +286,19 @@
       <div class="w-10"></div>
     </div>
 
+    <!-- Title slide -->
+    <div data-slideshow-target="titleSlide" class="absolute inset-0 flex items-center justify-center">
+      <div class="text-center px-8 max-w-4xl">
+        <h1 data-slideshow-target="galleryTitle" class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6"></h1>
+        <p data-slideshow-target="galleryDescription" class="text-xl sm:text-2xl text-white/70 leading-relaxed"></p>
+        <div class="mt-12 text-white/40 text-sm">
+          <span data-slideshow-target="photoCount"></span>
+        </div>
+      </div>
+    </div>
+
     <!-- Image area -->
-    <div class="absolute inset-0 flex items-center justify-center" data-action="click->slideshow#stopPropagation">
+    <div data-slideshow-target="imageArea" class="hidden absolute inset-0 flex items-center justify-center" data-action="click->slideshow#stopPropagation">
       <button data-action="click->slideshow#manualPrev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
@@ -302,7 +315,7 @@
     </div>
 
     <!-- Bottom info bar -->
-    <div class="absolute bottom-0 left-0 right-0 z-20" data-action="click->slideshow#stopPropagation">
+    <div data-slideshow-target="infoBar" class="hidden absolute bottom-0 left-0 right-0 z-20" data-action="click->slideshow#stopPropagation">
       <div class="bg-gradient-to-t from-black/80 to-transparent px-6 pt-16 pb-6">
         <div class="max-w-3xl mx-auto">
           <div class="flex items-center justify-between mb-2">

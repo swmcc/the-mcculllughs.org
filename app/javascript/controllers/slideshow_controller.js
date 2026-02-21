@@ -1,17 +1,19 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar"]
   static values = {
     images: Array,
-    interval: { type: Number, default: 5 }
+    interval: { type: Number, default: 5 },
+    galleryTitle: String,
+    galleryDescription: String
   }
 
   // Available transitions
   transitions = ["fade", "slide-left", "slide-right", "zoom"]
 
   connect() {
-    this.currentIndex = 0
+    this.currentIndex = -1 // -1 = title slide, 0+ = photos
     this.timer = null
     this.lastTransition = null
   }
@@ -41,12 +43,26 @@ export default class extends Controller {
     event.preventDefault()
     const interval = parseInt(this.intervalInputTarget.value, 10) || 5
     this.intervalValue = interval
-    this.currentIndex = 0
+    this.currentIndex = -1 // Start with title slide
 
     this.closeConfig()
     this.showSlideshow()
-    this.showImage(false) // No transition for first image
+    this.showTitleSlide()
     this.startTimer()
+  }
+
+  showTitleSlide() {
+    // Populate title slide content
+    this.galleryTitleTarget.textContent = this.galleryTitleValue || "Untitled Album"
+    this.galleryDescriptionTarget.textContent = this.galleryDescriptionValue || ""
+    this.photoCountTarget.textContent = `${this.imagesValue.length} photos`
+
+    // Show title slide, hide image area and info bar
+    this.titleSlideTarget.classList.remove("hidden")
+    this.imageAreaTarget.classList.add("hidden")
+    if (this.hasInfoBarTarget) this.infoBarTarget.classList.add("hidden")
+
+    this.counterTarget.textContent = ""
   }
 
   showSlideshow() {
@@ -62,8 +78,19 @@ export default class extends Controller {
   }
 
   showImage(withTransition = true) {
+    // If on title slide index, show title slide
+    if (this.currentIndex === -1) {
+      this.showTitleSlide()
+      return
+    }
+
     const img = this.imagesValue[this.currentIndex]
     if (!img) return
+
+    // Hide title slide, show image area and info bar
+    this.titleSlideTarget.classList.add("hidden")
+    this.imageAreaTarget.classList.remove("hidden")
+    if (this.hasInfoBarTarget) this.infoBarTarget.classList.remove("hidden")
 
     if (withTransition) {
       this.applyTransition(() => {
@@ -146,12 +173,20 @@ export default class extends Controller {
   }
 
   next() {
-    this.currentIndex = (this.currentIndex + 1) % this.imagesValue.length
+    // -1 (title) -> 0 -> 1 -> ... -> length-1 -> -1 (loop back to title)
+    this.currentIndex++
+    if (this.currentIndex >= this.imagesValue.length) {
+      this.currentIndex = -1
+    }
     this.showImage()
   }
 
   prev() {
-    this.currentIndex = (this.currentIndex - 1 + this.imagesValue.length) % this.imagesValue.length
+    // ... -> 1 -> 0 -> -1 (title) -> length-1 -> ...
+    this.currentIndex--
+    if (this.currentIndex < -1) {
+      this.currentIndex = this.imagesValue.length - 1
+    }
     this.showImage()
   }
 
