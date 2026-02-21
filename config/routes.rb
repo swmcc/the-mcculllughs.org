@@ -8,6 +8,9 @@ Rails.application.routes.draw do
   get "about", to: "pages#about"
   get "colophon", to: "pages#colophon"
 
+  # Search
+  get "search", to: "search#index"
+
   # Galleries with nested uploads
   resources :galleries do
     resources :uploads, only: [ :create ]
