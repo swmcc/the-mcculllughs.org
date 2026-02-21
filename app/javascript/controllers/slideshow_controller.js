@@ -7,9 +7,13 @@ export default class extends Controller {
     interval: { type: Number, default: 5 }
   }
 
+  // Available transitions
+  transitions = ["fade", "slide-left", "slide-right", "zoom"]
+
   connect() {
     this.currentIndex = 0
     this.timer = null
+    this.lastTransition = null
   }
 
   disconnect() {
@@ -41,7 +45,7 @@ export default class extends Controller {
 
     this.closeConfig()
     this.showSlideshow()
-    this.showImage()
+    this.showImage(false) // No transition for first image
     this.startTimer()
   }
 
@@ -57,12 +61,77 @@ export default class extends Controller {
     document.body.style.overflow = ""
   }
 
-  showImage() {
+  showImage(withTransition = true) {
     const img = this.imagesValue[this.currentIndex]
     if (!img) return
 
-    this.imageTarget.src = img.large || img.medium || img.original
+    if (withTransition) {
+      this.applyTransition(() => {
+        this.imageTarget.src = img.large || img.medium || img.original
+      })
+    } else {
+      this.imageTarget.src = img.large || img.medium || img.original
+    }
     this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`
+  }
+
+  pickRandomTransition() {
+    // Pick a random transition, avoiding the same one twice in a row
+    let available = this.transitions.filter(t => t !== this.lastTransition)
+    const transition = available[Math.floor(Math.random() * available.length)]
+    this.lastTransition = transition
+    return transition
+  }
+
+  applyTransition(loadNewImage) {
+    const transition = this.pickRandomTransition()
+    const img = this.imageTarget
+
+    // Remove any existing transition classes
+    img.classList.remove("fade-in", "fade-out", "slide-in-left", "slide-out-left",
+                         "slide-in-right", "slide-out-right", "zoom-in", "zoom-out")
+
+    // Apply exit animation
+    switch (transition) {
+      case "fade":
+        img.classList.add("fade-out")
+        break
+      case "slide-left":
+        img.classList.add("slide-out-left")
+        break
+      case "slide-right":
+        img.classList.add("slide-out-right")
+        break
+      case "zoom":
+        img.classList.add("zoom-out")
+        break
+    }
+
+    // After exit animation, load new image and apply enter animation
+    setTimeout(() => {
+      loadNewImage()
+      img.classList.remove("fade-out", "slide-out-left", "slide-out-right", "zoom-out")
+
+      switch (transition) {
+        case "fade":
+          img.classList.add("fade-in")
+          break
+        case "slide-left":
+          img.classList.add("slide-in-left")
+          break
+        case "slide-right":
+          img.classList.add("slide-in-right")
+          break
+        case "zoom":
+          img.classList.add("zoom-in")
+          break
+      }
+
+      // Clean up after animation completes
+      setTimeout(() => {
+        img.classList.remove("fade-in", "slide-in-left", "slide-in-right", "zoom-in")
+      }, 500)
+    }, 300)
   }
 
   next() {
