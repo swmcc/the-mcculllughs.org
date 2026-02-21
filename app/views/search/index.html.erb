@@ -9,10 +9,7 @@
       date_taken: u.date_taken&.to_s,
       gallery_title: u.gallery.title,
       gallery_path: gallery_path(u.gallery, anchor: dom_id(u)),
-      original: url_for(u.file),
-      large: url_for(u.file.variant(resize_to_limit: [2048, 2048])),
-      medium: url_for(u.file.variant(resize_to_limit: [1024, 1024])),
-      small: url_for(u.file.variant(resize_to_limit: [640, 640]))
+      original: url_for(u.file)
     }
   end.compact
 %>
@@ -60,7 +57,7 @@
         <% next unless upload.file.attached? %>
         <a href="#" data-action="click->search-lightbox#open" data-index="<%= index %>" class="group block">
           <div class="relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-            <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
+            <%= image_tag url_for(upload.file),
                 class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
                 loading: "lazy",
                 alt: upload.title %>

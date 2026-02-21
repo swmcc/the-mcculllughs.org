@@ -63,7 +63,7 @@ export default class extends Controller {
     if (!img) return
 
     // Update image
-    this.imageTarget.src = img.large || img.original
+    this.imageTarget.src = img.original
 
     // Update counter
     this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`
