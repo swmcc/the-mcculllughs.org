@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 }
@@ -73,6 +73,17 @@ export default class extends Controller {
       this.imageTarget.src = img.large || img.medium || img.original
     }
     this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`
+
+    // Update photo info
+    this.titleTarget.textContent = img.title || ""
+    this.captionTarget.textContent = img.caption || ""
+    this.dateTakenTarget.textContent = img.date_taken ? this.formatDate(img.date_taken) : ""
+  }
+
+  formatDate(dateStr) {
+    if (!dateStr) return ""
+    const date = new Date(dateStr)
+    return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
   }
 
   pickRandomTransition() {
@@ -176,14 +187,16 @@ export default class extends Controller {
   }
 
   togglePause(event) {
-    event.preventDefault()
-    event.stopPropagation()
+    if (event) {
+      event.preventDefault()
+      event.stopPropagation()
+    }
     if (this.timer) {
       this.stopTimer()
-      event.currentTarget.innerHTML = this.playIcon()
+      this.pauseBtnTarget.innerHTML = this.playIcon()
     } else {
       this.startTimer()
-      event.currentTarget.innerHTML = this.pauseIcon()
+      this.pauseBtnTarget.innerHTML = this.pauseIcon()
     }
   }
 
