@@ -46,6 +46,9 @@ Rails.application.routes.draw do
   get "p/:short_code", to: "public_photos#show", as: :public_photo
   patch "p/:short_code", to: "public_photos#update"
 
+  # Public slideshow sharing (no auth required)
+  get "s/:short_code", to: "public_slideshows#show", as: :public_slideshow
+
   # Admin namespace
   namespace :admin do
     root "dashboard#index"

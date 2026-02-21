@@ -10,10 +10,14 @@
 
   <!-- Top bar -->
   <div class="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
-    <%= link_to slideshows_path, class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10" do %>
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-      </svg>
+    <% if user_signed_in? %>
+      <%= link_to slideshows_path, class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      <% end %>
+    <% else %>
+      <div class="w-10"></div>
     <% end %>
 
     <span data-slideshow-target="counter" class="text-white/70 text-sm"></span>
