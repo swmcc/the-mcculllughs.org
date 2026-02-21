@@ -2,11 +2,19 @@ class SlideshowsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @slideshows = current_user.slideshows.includes(:uploads).order(created_at: :desc)
+    @slideshows = if current_user.admin?
+      Slideshow.includes(:uploads, :user).order(created_at: :desc)
+    else
+      current_user.slideshows.includes(:uploads).order(created_at: :desc)
+    end
   end
 
   def show
-    @slideshow = current_user.slideshows.find(params[:id])
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
     @uploads = @slideshow.uploads
 
     @images_data = @uploads.select { |u| u.file.attached? }.map.with_index do |u, i|

@@ -1,6 +1,6 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex items-center justify-between mb-6">
-    <h1 class="text-2xl font-semibold text-neutral-800">My Slideshows</h1>
+    <h1 class="text-2xl font-semibold text-neutral-800"><%= current_user.admin? ? "All Slideshows" : "My Slideshows" %></h1>
   </div>
 
   <% if @slideshows.any? %>
@@ -21,6 +21,9 @@
 
           <div class="p-4">
             <h3 class="font-medium text-neutral-800 mb-1 truncate"><%= slideshow.title %></h3>
+            <% if current_user.admin? %>
+              <p class="text-xs text-purple-600 mb-1"><%= slideshow.user.name %></p>
+            <% end %>
             <div class="flex items-center flex-wrap text-xs text-neutral-500 mb-3">
               <span><%= pluralize(slideshow.uploads.count, 'photo') %></span>
               <span class="mx-2">•</span>
