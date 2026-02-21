@@ -1,0 +1,45 @@
+<div class="min-h-screen flex flex-col">
+  <div class="flex-1 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-6">
+      <%= link_to root_path, class: "inline-flex items-center text-sm text-neutral-500 hover:text-neutral-800 transition-colors" do %>
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back
+      <% end %>
+    </div>
+
+    <h1 class="text-3xl font-bold text-neutral-800 mb-8">Colophon</h1>
+
+    <div class="space-y-8">
+      <section>
+        <h2 class="text-lg font-semibold text-neutral-800 mb-3">Built With</h2>
+        <ul class="space-y-2 text-neutral-600">
+          <li><%= link_to "Ruby on Rails 8", "https://rubyonrails.org", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Web framework</li>
+          <li><%= link_to "Hotwire", "https://hotwired.dev", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Turbo + Stimulus for interactivity</li>
+          <li><%= link_to "Tailwind CSS", "https://tailwindcss.com", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Styling</li>
+          <li><%= link_to "PostgreSQL", "https://www.postgresql.org", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Database</li>
+          <li><%= link_to "Active Storage", "https://guides.rubyonrails.org/active_storage_overview.html", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — File uploads</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-semibold text-neutral-800 mb-3">Hosted On</h2>
+        <ul class="space-y-2 text-neutral-600">
+          <li><%= link_to "DigitalOcean", "https://www.digitalocean.com", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Application hosting</li>
+          <li><%= link_to "Amazon S3", "https://aws.amazon.com/s3/", class: "text-blue-600 hover:text-blue-800", target: "_blank" %> — Photo storage</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-semibold text-neutral-800 mb-3">Source Code</h2>
+        <p class="text-neutral-600">
+          This project is open source and available on
+          <%= link_to "GitHub", "https://github.com/swmcc/the-mcculllughs.org", class: "text-blue-600 hover:text-blue-800", target: "_blank" %>.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <%= render "shared/footer" %>
+</div>

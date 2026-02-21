@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   # Root path - landing page for public, galleries for logged in
   root "home#index"
 
+  # Static pages
+  get "about", to: "pages#about"
+  get "colophon", to: "pages#colophon"
+
   # Galleries with nested uploads
   resources :galleries do
     resources :uploads, only: [ :create ]

@@ -1,0 +1,30 @@
+<div class="min-h-screen flex flex-col">
+  <div class="flex-1 max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-6">
+      <%= link_to root_path, class: "inline-flex items-center text-sm text-neutral-500 hover:text-neutral-800 transition-colors" do %>
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back
+      <% end %>
+    </div>
+
+    <h1 class="text-3xl font-bold text-neutral-800 mb-8">About</h1>
+
+    <div class="prose prose-neutral">
+      <p class="text-neutral-600 leading-relaxed mb-4">
+        The McCulloughs is a private family photo gallery, built to keep our memories safe and accessible to family members.
+      </p>
+
+      <p class="text-neutral-600 leading-relaxed mb-4">
+        Rather than trust our photos to social media platforms that come and go, we built our own space. A simple, focused place for family photos without the noise.
+      </p>
+
+      <p class="text-neutral-600 leading-relaxed">
+        Photos can be shared publicly via unique links, making it easy to share specific moments with friends and extended family.
+      </p>
+    </div>
+  </div>
+
+  <%= render "shared/footer" %>
+</div>
