@@ -1,0 +1,124 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <%= link_to galleries_path, class: "inline-flex items-center text-sm text-neutral-500 hover:text-neutral-800 transition-colors" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back to Galleries
+    <% end %>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-800 mb-2">Import Photos</h1>
+    <p class="text-neutral-500 text-sm">Connect your photo services to import albums</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Flickr -->
+    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-pink-500 to-blue-500 rounded-xl flex items-center justify-center">
+          <span class="text-white text-xl font-bold">f</span>
+        </div>
+        <div>
+          <h3 class="font-medium text-neutral-800">Flickr</h3>
+          <% if @connections["flickr"] %>
+            <p class="text-xs text-green-600">Connected as <%= @connections["flickr"].external_username %></p>
+          <% else %>
+            <p class="text-xs text-neutral-500">Not connected</p>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @connections["flickr"] %>
+        <div class="space-y-2">
+          <%= link_to albums_imports_path("flickr"), class: "block w-full text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors" do %>
+            Browse Albums
+          <% end %>
+          <%= button_to disconnect_imports_path("flickr"), method: :delete, class: "block w-full text-center px-4 py-2 text-red-600 hover:text-red-700 text-sm transition-colors" do %>
+            Disconnect
+          <% end %>
+        </div>
+      <% else %>
+        <%= link_to connect_imports_path("flickr"), class: "block w-full text-center px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-lg text-sm font-medium transition-colors" do %>
+          Connect Flickr
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Google Photos (Coming Soon) -->
+    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 opacity-60">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-red-500 via-yellow-500 to-green-500 rounded-xl flex items-center justify-center">
+          <span class="text-white text-xl font-bold">G</span>
+        </div>
+        <div>
+          <h3 class="font-medium text-neutral-800">Google Photos</h3>
+          <p class="text-xs text-neutral-500">Coming soon</p>
+        </div>
+      </div>
+      <button disabled class="block w-full text-center px-4 py-2 bg-neutral-100 text-neutral-400 rounded-lg text-sm font-medium cursor-not-allowed">
+        Connect Google
+      </button>
+    </div>
+
+    <!-- Facebook (Coming Soon) -->
+    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 opacity-60">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+          <span class="text-white text-xl font-bold">f</span>
+        </div>
+        <div>
+          <h3 class="font-medium text-neutral-800">Facebook</h3>
+          <p class="text-xs text-neutral-500">Coming soon</p>
+        </div>
+      </div>
+      <button disabled class="block w-full text-center px-4 py-2 bg-neutral-100 text-neutral-400 rounded-lg text-sm font-medium cursor-not-allowed">
+        Connect Facebook
+      </button>
+    </div>
+  </div>
+
+  <% if current_user.imports.any? %>
+    <div class="mt-12">
+      <h2 class="text-lg font-medium text-neutral-800 mb-4">Recent Imports</h2>
+      <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden">
+        <table class="min-w-full divide-y divide-neutral-200">
+          <thead class="bg-neutral-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Album</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Source</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Progress</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-neutral-500 uppercase">Status</th>
+              <th class="px-4 py-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-200">
+            <% current_user.imports.recent.limit(10).each do |import| %>
+              <tr>
+                <td class="px-4 py-3 text-sm text-neutral-800"><%= import.album_title || "Untitled" %></td>
+                <td class="px-4 py-3 text-sm text-neutral-500 capitalize"><%= import.provider %></td>
+                <td class="px-4 py-3 text-sm text-neutral-500">
+                  <%= import.imported_count %>/<%= import.total_photos %>
+                  <% if import.failed_count > 0 %>
+                    <span class="text-red-500">(<%= import.failed_count %> failed)</span>
+                  <% end %>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex px-2 py-1 text-xs rounded-full <%= status_badge_class(import.status) %>">
+                    <%= import.status.titleize %>
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <% if import.gallery %>
+                    <%= link_to "View Gallery", gallery_path(import.gallery), class: "text-sm text-blue-600 hover:text-blue-700" %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+</div>

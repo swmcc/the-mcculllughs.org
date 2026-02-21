@@ -14,4 +14,15 @@ class User < ApplicationRecord
   # Associations
   has_many :galleries, dependent: :destroy
   has_many :uploads, dependent: :destroy
+  has_many :external_connections, dependent: :destroy
+  has_many :imports, dependent: :destroy
+
+  # External connections helpers
+  def connected_to?(provider)
+    external_connections.for_provider(provider).exists?
+  end
+
+  def connection_for(provider)
+    external_connections.for_provider(provider).first
+  end
 end

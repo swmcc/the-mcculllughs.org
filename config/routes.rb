@@ -19,6 +19,21 @@ Rails.application.routes.draw do
   # Uploads (for update/destroy actions outside nested route)
   resources :uploads, only: [ :update, :destroy ]
 
+  # External photo imports
+  resources :imports, only: [ :index ] do
+    collection do
+      get "providers"
+      get ":provider/connect", action: :connect, as: :connect
+      get ":provider/callback", action: :callback, as: :callback
+      delete ":provider/disconnect", action: :disconnect, as: :disconnect
+      get ":provider/albums", action: :albums, as: :albums
+      post ":provider/import", action: :import, as: :import
+    end
+    member do
+      get "status"
+    end
+  end
+
   # Public photo sharing (no auth required)
   get "t/:short_code", to: "public_photos#thumbnail", as: :public_thumbnail
   get "p/:short_code", to: "public_photos#show", as: :public_photo

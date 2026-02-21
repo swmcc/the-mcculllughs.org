@@ -1,6 +1,7 @@
 class Upload < ApplicationRecord
   belongs_to :user
   belongs_to :gallery
+  belongs_to :import, optional: true
 
   # Active Storage attachments
   has_one_attached :file
@@ -21,6 +22,12 @@ class Upload < ApplicationRecord
   scope :images, -> { where("uploads.file_content_type LIKE ?", "image/%") }
   scope :videos, -> { where("uploads.file_content_type LIKE ?", "video/%") }
   scope :publicly_visible, -> { where(is_public: true) }
+  scope :from_import, -> { where.not(import_id: nil) }
+
+  # Import helpers
+  def imported?
+    external_photo_id.present?
+  end
 
   # Public URL helper
   def public_url

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_041632) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "external_connections", force: :cascade do |t|
+    t.string "access_secret"
+    t.string "access_token"
+    t.datetime "connected_at"
+    t.datetime "created_at", null: false
+    t.string "external_user_id"
+    t.string "external_username"
+    t.string "provider", null: false
+    t.string "refresh_token"
+    t.datetime "token_expires_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "provider"], name: "index_external_connections_on_user_id_and_provider", unique: true
+    t.index ["user_id"], name: "index_external_connections_on_user_id"
+  end
+
   create_table "galleries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -49,6 +65,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_galleries_on_user_id"
+  end
+
+  create_table "imports", force: :cascade do |t|
+    t.string "album_title"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "external_album_id", null: false
+    t.bigint "external_connection_id"
+    t.integer "failed_count", default: 0
+    t.bigint "gallery_id"
+    t.integer "imported_count", default: 0
+    t.string "provider", null: false
+    t.datetime "started_at"
+    t.string "status", default: "pending", null: false
+    t.integer "total_photos", default: 0
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["external_connection_id"], name: "index_imports_on_external_connection_id"
+    t.index ["gallery_id"], name: "index_imports_on_gallery_id"
+    t.index ["status"], name: "index_imports_on_status"
+    t.index ["user_id", "provider", "external_album_id"], name: "idx_imports_user_provider_album", unique: true
+    t.index ["user_id"], name: "index_imports_on_user_id"
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -176,13 +215,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
     t.text "caption"
     t.datetime "created_at", null: false
     t.date "date_taken"
+    t.string "external_photo_id"
     t.bigint "gallery_id", null: false
+    t.bigint "import_id"
+    t.jsonb "import_metadata", default: {}
     t.boolean "is_public", default: false, null: false
     t.string "short_code", null: false
     t.string "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["external_photo_id", "import_id"], name: "index_uploads_on_external_photo_id_and_import_id"
     t.index ["gallery_id"], name: "index_uploads_on_gallery_id"
+    t.index ["import_metadata"], name: "index_uploads_on_import_metadata", using: :gin
     t.index ["short_code"], name: "index_uploads_on_short_code", unique: true
     t.index ["user_id"], name: "index_uploads_on_user_id"
   end
@@ -203,7 +247,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "external_connections", "users"
   add_foreign_key "galleries", "users"
+  add_foreign_key "imports", "external_connections"
+  add_foreign_key "imports", "galleries"
+  add_foreign_key "imports", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
@@ -211,5 +259,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "uploads", "galleries"
+  add_foreign_key "uploads", "imports"
   add_foreign_key "uploads", "users"
 end
