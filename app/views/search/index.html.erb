@@ -1,0 +1,72 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-6">
+    <%= link_to galleries_path, class: "inline-flex items-center text-sm text-white/60 hover:text-white transition-colors" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back
+    <% end %>
+  </div>
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold text-white mb-2">
+      <% if @query.present? %>
+        Results for "<%= @query %>"
+      <% else %>
+        Search
+      <% end %>
+    </h1>
+    <% if @query.present? %>
+      <p class="text-white/60 text-sm"><%= pluralize(@results.size, 'photo') %> found</p>
+    <% end %>
+  </div>
+
+  <% if @results.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <% @results.each do |upload| %>
+        <%= link_to gallery_path(upload.gallery, anchor: dom_id(upload)), class: "group block" do %>
+          <div class="relative aspect-square bg-neutral-800 rounded-lg overflow-hidden">
+            <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
+                class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+                loading: "lazy",
+                alt: upload.title %>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div class="absolute bottom-0 left-0 right-0 p-3">
+                <% if upload.title.present? %>
+                  <p class="text-white text-sm font-medium mb-1 line-clamp-1"><%= upload.title %></p>
+                <% end %>
+                <p class="text-white/70 text-xs"><%= upload.gallery.title %></p>
+                <% if upload.date_taken.present? %>
+                  <p class="text-white/50 text-xs"><%= upload.date_taken.strftime("%d %b %Y") %></p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% elsif @query.present? %>
+    <div class="text-center py-20">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-neutral-800 rounded-full mb-4">
+        <span class="text-2xl">🔍</span>
+      </div>
+      <h3 class="text-lg font-medium text-white mb-2">No photos found</h3>
+      <p class="text-white/60 text-sm mb-4">Try different keywords or date formats</p>
+      <div class="text-white/40 text-xs space-y-1">
+        <p>Examples: "birthday", "August 1998", "11-04-1979"</p>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-center py-20">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-neutral-800 rounded-full mb-4">
+        <span class="text-2xl">🔍</span>
+      </div>
+      <h3 class="text-lg font-medium text-white mb-2">Search your photos</h3>
+      <p class="text-white/60 text-sm mb-4">Find photos by title, caption, or date</p>
+      <div class="text-white/40 text-xs space-y-1">
+        <p><strong class="text-white/60">Text:</strong> birthday, wedding, holiday</p>
+        <p><strong class="text-white/60">Dates:</strong> August 98, 1998, 11-04-1979, April 11th 1979</p>
+      </div>
+    </div>
+  <% end %>
+</div>

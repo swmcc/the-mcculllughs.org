@@ -39,14 +39,16 @@
 
             <!-- Search -->
             <div class="flex-1 max-w-lg mx-6">
-              <div class="relative group">
+              <%= form_with url: search_path, method: :get, local: true, class: "relative group" do %>
                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <span class="text-lg">🔍</span>
                 </div>
                 <input type="text"
+                       name="q"
+                       value="<%= params[:q] %>"
                        placeholder="Search photos, galleries, dates..."
                        class="w-full bg-gradient-to-r from-white/10 to-white/5 border border-white/20 rounded-xl pl-12 pr-4 py-2.5 text-sm text-white placeholder-white/50 shadow-lg focus:outline-none focus:from-white/15 focus:to-white/10 focus:border-white/30 focus:shadow-xl transition-all">
-              </div>
+              <% end %>
             </div>
 
             <div class="flex items-center space-x-3">
