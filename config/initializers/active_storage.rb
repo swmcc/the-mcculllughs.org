@@ -5,4 +5,5 @@ Rails.application.config.to_prepare do
   ActiveStorage::Blobs::ProxyController.skip_before_action :authenticate_user!, raise: false
   ActiveStorage::Representations::RedirectController.skip_before_action :authenticate_user!, raise: false
   ActiveStorage::Representations::ProxyController.skip_before_action :authenticate_user!, raise: false
+  ActiveStorage::DiskController.skip_before_action :authenticate_user!, raise: false if defined?(ActiveStorage::DiskController)
 end

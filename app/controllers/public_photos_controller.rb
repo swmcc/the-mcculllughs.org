@@ -6,7 +6,7 @@ class PublicPhotosController < ApplicationController
   def thumbnail
     raise ActiveRecord::RecordNotFound unless @upload.is_public?
 
-    redirect_to url_for(@upload.file.variant(resize_to_fill: [ 80, 80 ])), allow_other_host: true
+    redirect_to rails_representation_url(@upload.file.variant(resize_to_fill: [ 80, 80 ])), allow_other_host: true
   end
 
   # GET /p/:short_code - full photo page
