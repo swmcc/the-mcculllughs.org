@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users, controllers: { registrations: "users/registrations" }
 
-  # Root path
-  root "galleries#index"
+  # Root path - landing page for public, galleries for logged in
+  root "home#index"
 
   # Galleries with nested uploads
   resources :galleries do
