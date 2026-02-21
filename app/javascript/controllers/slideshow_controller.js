@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle", "spotifySearch", "spotifyResults", "spotifySpinner", "spotifySelected", "spotifySelectedImage", "spotifySelectedName", "spotifySelectedMeta", "saveModal", "saveTitleInput", "saveDescriptionInput", "saveIntervalInput", "saveSpotifySearch", "saveSpotifyResults", "saveSpotifySpinner", "saveSpotifySelected", "saveSpotifySelectedImage", "saveSpotifySelectedName", "saveSpotifySelectedMeta", "saveSpotifyInput"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle", "spotifySearch", "spotifyResults", "spotifySpinner", "spotifySelected", "spotifySelectedImage", "spotifySelectedName", "spotifySelectedMeta", "saveModal", "saveTitleInput", "saveDescriptionInput", "saveIntervalInput", "saveSpotifySearch", "saveSpotifyResults", "saveSpotifySpinner", "saveSpotifySelected", "saveSpotifySelectedImage", "saveSpotifySelectedName", "saveSpotifySelectedMeta", "saveSpotifyInput", "startBtn"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 },
@@ -23,13 +23,24 @@ export default class extends Controller {
     this.searchTimeout = null
     this.saveSearchTimeout = null
 
-    // Auto-start for saved slideshows
-    if (this.autoplayValue && this.imagesValue.length > 0) {
-      this.setupSpotifyFromUrl()
-      this.showSlideshow()
-      this.showTitleSlide()
-      this.startTimer()
+    // For saved slideshows, just show the title slide and wait for start button
+    // (autoplayValue is set but we don't auto-start - user must click to satisfy browser autoplay policy)
+  }
+
+  // Called when user clicks "Start Slideshow" on saved slideshow title screen
+  startSavedSlideshow(event) {
+    if (event) event.preventDefault()
+
+    // Hide the start button
+    if (this.hasStartBtnTarget) {
+      this.startBtnTarget.classList.add("hidden")
     }
+
+    // Set up Spotify with autoplay (user has now interacted)
+    this.setupSpotifyFromUrl()
+
+    // Start the slideshow timer
+    this.startTimer()
   }
 
   setupSpotifyFromUrl() {
