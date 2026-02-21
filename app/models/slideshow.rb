@@ -3,6 +3,8 @@ class Slideshow < ApplicationRecord
   has_many :slideshow_uploads, -> { order(:position) }, dependent: :destroy
   has_many :uploads, through: :slideshow_uploads
 
+  has_one_attached :audio
+
   validates :title, presence: true
   validates :interval, numericality: { in: 1..60 }
   validates :short_code, presence: true, uniqueness: true

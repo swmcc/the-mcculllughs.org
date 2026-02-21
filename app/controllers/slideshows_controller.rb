@@ -51,6 +51,19 @@ class SlideshowsController < ApplicationController
     end
   end
 
+  def edit
+    @slideshow = current_user.slideshows.find(params[:id])
+  end
+
+  def update
+    @slideshow = current_user.slideshows.find(params[:id])
+    if @slideshow.update(slideshow_params)
+      redirect_to slideshow_path(@slideshow), notice: "Slideshow updated"
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     @slideshow = current_user.slideshows.find(params[:id])
     @slideshow.destroy
@@ -60,7 +73,7 @@ class SlideshowsController < ApplicationController
   private
 
   def slideshow_params
-    params.require(:slideshow).permit(:title, :description, :spotify_url, :interval)
+    params.require(:slideshow).permit(:title, :description, :interval, :audio)
   end
 
   def upload_variant_url(upload, variant)

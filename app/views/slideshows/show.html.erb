@@ -4,37 +4,50 @@
      data-slideshow-gallery-title-value="<%= @slideshow.title %>"
      data-slideshow-gallery-description-value="<%= @slideshow.description %>"
      data-slideshow-interval-value="<%= @slideshow.interval %>"
-     data-slideshow-spotify-url-value="<%= @slideshow.spotify_url %>"
+     data-slideshow-audio-url-value="<%= @slideshow.audio.attached? ? url_for(@slideshow.audio) : '' %>"
      data-slideshow-autoplay-value="true"
      data-action="keydown@window->slideshow#keydown">
 
+  <!-- Hidden audio element -->
+  <% if @slideshow.audio.attached? %>
+    <audio data-slideshow-target="audio" loop preload="auto">
+      <source src="<%= url_for(@slideshow.audio) %>" type="<%= @slideshow.audio.content_type %>">
+    </audio>
+  <% end %>
+
   <!-- Top bar -->
   <div class="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
-    <% if user_signed_in? %>
-      <%= link_to slideshows_path, class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10" do %>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
+    <div class="flex items-center gap-2">
+      <% if user_signed_in? %>
+        <%= link_to slideshows_path, class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        <% end %>
+        <%= link_to edit_slideshow_path(@slideshow), class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10", title: "Edit slideshow" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        <% end %>
+      <% else %>
+        <div class="w-10"></div>
       <% end %>
-    <% else %>
-      <div class="w-10"></div>
-    <% end %>
+    </div>
 
     <span data-slideshow-target="counter" class="text-white/70 text-sm"></span>
 
-    <!-- Spotify toggle button -->
-    <button data-slideshow-target="spotifyToggle"
-            data-action="click->slideshow#toggleSpotify"
-            class="<%= @slideshow.spotify_url.present? ? '' : 'hidden' %> p-2 text-white/70 hover:text-green-400 transition-colors rounded-lg hover:bg-white/10">
-      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Spotify player (bottom-left) -->
-  <div data-slideshow-target="spotifyPlayer"
-       class="hidden absolute bottom-24 left-4 z-30 rounded-xl overflow-hidden shadow-2xl">
+    <!-- Audio toggle button -->
+    <% if @slideshow.audio.attached? %>
+      <button data-slideshow-target="audioToggle"
+              data-action="click->slideshow#toggleAudio"
+              class="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10">
+        <svg data-slideshow-target="audioIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+        </svg>
+      </button>
+    <% else %>
+      <div class="w-10"></div>
+    <% end %>
   </div>
 
   <!-- Title slide -->
@@ -44,11 +57,11 @@
       <p data-slideshow-target="galleryDescription" class="text-xl sm:text-2xl text-white/70 leading-relaxed"><%= @slideshow.description %></p>
       <div class="mt-8 text-white/40 text-sm">
         <span data-slideshow-target="photoCount"><%= pluralize(@uploads.count, 'photo') %></span>
-        <% if @slideshow.spotify_url.present? %>
+        <% if @slideshow.audio.attached? %>
           <span class="mx-2">•</span>
           <span class="inline-flex items-center gap-1">
-            <svg class="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
             </svg>
             Music
           </span>

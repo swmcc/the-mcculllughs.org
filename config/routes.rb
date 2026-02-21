@@ -23,7 +23,7 @@ Rails.application.routes.draw do
   resources :uploads, only: [ :update, :destroy ]
 
   # Saved slideshows
-  resources :slideshows, only: [ :index, :show, :create, :destroy ]
+  resources :slideshows, only: [ :index, :show, :create, :edit, :update, :destroy ]
 
   # External photo imports
   resources :imports, only: [ :index ] do
