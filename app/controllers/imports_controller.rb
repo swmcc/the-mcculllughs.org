@@ -2,7 +2,7 @@
 
 class ImportsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_provider, only: [ :connect, :callback, :disconnect, :albums, :import ]
+  before_action :set_provider, only: [ :connect, :setup, :callback, :disconnect, :albums, :import ]
   before_action :ensure_connected, only: [ :albums, :import ]
 
   PROVIDERS = {
@@ -20,9 +20,31 @@ class ImportsController < ApplicationController
     @connections = current_user.external_connections.index_by(&:provider)
   end
 
+  # GET /imports/:provider/setup - Show form to enter API credentials
+  def setup
+    @connection = current_user.external_connections.find_or_initialize_by(provider: @provider_name)
+  end
+
   # GET /imports/:provider/connect
   def connect
-    result = @provider_service.authorize_url(callback_url: callback_imports_url(@provider_name))
+    # Check if we have API credentials (from form submission or existing connection)
+    api_key = params[:api_key].presence || current_user.connection_for(@provider_name)&.api_key
+    api_secret = params[:api_secret].presence || current_user.connection_for(@provider_name)&.api_secret
+
+    unless api_key.present? && api_secret.present?
+      redirect_to setup_imports_path(@provider_name), alert: "Please enter your API credentials first"
+      return
+    end
+
+    # Store credentials in session for the callback
+    session[:oauth_api_key] = api_key
+    session[:oauth_api_secret] = api_secret
+
+    result = @provider_service.authorize_url(
+      callback_url: callback_imports_url(@provider_name),
+      api_key: api_key,
+      api_secret: api_secret
+    )
 
     # Store request token in session for OAuth 1.0a
     if result[:request_token]
@@ -35,6 +57,9 @@ class ImportsController < ApplicationController
 
   # GET /imports/:provider/callback
   def callback
+    api_key = session.delete(:oauth_api_key)
+    api_secret = session.delete(:oauth_api_secret)
+
     params_for_exchange = {
       oauth_verifier: params[:oauth_verifier],
       code: params[:code],
@@ -44,11 +69,15 @@ class ImportsController < ApplicationController
 
     result = @provider_service.exchange_code(
       params: params_for_exchange,
-      callback_url: callback_imports_url(@provider_name)
+      callback_url: callback_imports_url(@provider_name),
+      api_key: api_key,
+      api_secret: api_secret
     )
 
     connection = current_user.external_connections.find_or_initialize_by(provider: @provider_name)
     connection.update!(
+      api_key: api_key,
+      api_secret: api_secret,
       access_token: result[:access_token],
       access_secret: result[:access_secret],
       refresh_token: result[:refresh_token],
@@ -140,7 +169,7 @@ class ImportsController < ApplicationController
 
   def ensure_connected
     unless current_user.connected_to?(@provider_name)
-      redirect_to connect_imports_path(@provider_name)
+      redirect_to setup_imports_path(@provider_name)
     end
   end
 end

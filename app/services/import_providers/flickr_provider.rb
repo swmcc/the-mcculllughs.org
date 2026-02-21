@@ -12,7 +12,11 @@ module ImportProviders
       "flickr"
     end
 
-    def authorize_url(callback_url:)
+    def authorize_url(callback_url:, api_key: nil, api_secret: nil)
+      # Use provided credentials or fall back to connection credentials
+      @temp_api_key = api_key
+      @temp_api_secret = api_secret
+
       request_token = consumer.get_request_token(oauth_callback: callback_url)
 
       # Store request token in session via the returned hash
@@ -23,7 +27,12 @@ module ImportProviders
       }
     end
 
-    def exchange_code(params:, callback_url:)
+    def exchange_code(params:, callback_url:, api_key: nil, api_secret: nil)
+      # Use provided credentials for the exchange
+      @temp_api_key = api_key
+      @temp_api_secret = api_secret
+      @consumer = nil # Reset consumer to use new credentials
+
       request_token = OAuth::RequestToken.new(
         consumer,
         params[:request_token],
@@ -102,9 +111,14 @@ module ImportProviders
     private
 
     def consumer
+      key = @temp_api_key || connection&.api_key
+      secret = @temp_api_secret || connection&.api_secret
+
+      raise "Flickr API credentials not configured" unless key.present? && secret.present?
+
       @consumer ||= OAuth::Consumer.new(
-        credentials[:api_key],
-        credentials[:api_secret],
+        key,
+        secret,
         site: FLICKR_SITE,
         request_token_path: "/services/oauth/request_token",
         access_token_path: "/services/oauth/access_token",

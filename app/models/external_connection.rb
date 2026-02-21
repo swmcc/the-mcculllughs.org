@@ -12,6 +12,12 @@ class ExternalConnection < ApplicationRecord
   encrypts :access_token
   encrypts :access_secret
   encrypts :refresh_token
+  encrypts :api_key
+  encrypts :api_secret
+
+  def has_api_credentials?
+    api_key.present? && api_secret.present?
+  end
 
   scope :for_provider, ->(provider) { where(provider: provider) }
 

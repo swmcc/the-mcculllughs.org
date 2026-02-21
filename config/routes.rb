@@ -23,6 +23,7 @@ Rails.application.routes.draw do
   resources :imports, only: [ :index ] do
     collection do
       get "providers"
+      get ":provider/setup", action: :setup, as: :setup
       get ":provider/connect", action: :connect, as: :connect
       get ":provider/callback", action: :callback, as: :callback
       delete ":provider/disconnect", action: :disconnect, as: :disconnect

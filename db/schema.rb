@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_041632) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_042504) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -45,6 +45,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_041632) do
   create_table "external_connections", force: :cascade do |t|
     t.string "access_secret"
     t.string "access_token"
+    t.string "api_key"
+    t.string "api_secret"
     t.datetime "connected_at"
     t.datetime "created_at", null: false
     t.string "external_user_id"
