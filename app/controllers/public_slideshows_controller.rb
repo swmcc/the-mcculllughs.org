@@ -1,4 +1,6 @@
 class PublicSlideshowsController < ApplicationController
+  skip_before_action :authenticate_user!
+
   def show
     @slideshow = Slideshow.find_by!(short_code: params[:short_code])
     @slideshow.increment!(:view_count)

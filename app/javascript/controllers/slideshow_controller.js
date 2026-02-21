@@ -57,7 +57,6 @@ export default class extends Controller {
         height="80"
         frameborder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
         class="rounded-xl">
       </iframe>
     `
@@ -125,7 +124,6 @@ export default class extends Controller {
         height="80"
         frameborder="0"
         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
         class="rounded-xl">
       </iframe>
     `
