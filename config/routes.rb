@@ -11,6 +11,9 @@ Rails.application.routes.draw do
   # Search
   get "search", to: "search#index"
 
+  # Spotify search API
+  get "spotify/search", to: "spotify#search"
+
   # Galleries with nested uploads
   resources :galleries do
     resources :uploads, only: [ :create ]

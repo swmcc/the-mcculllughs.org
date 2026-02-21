@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle", "spotifySearch", "spotifyResults", "spotifySpinner", "spotifySelected", "spotifySelectedImage", "spotifySelectedName", "spotifySelectedMeta"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 },
@@ -18,6 +18,7 @@ export default class extends Controller {
     this.lastTransition = null
     this.spotifyUrl = null
     this.spotifyVisible = true
+    this.searchTimeout = null
   }
 
   disconnect() {
@@ -113,6 +114,96 @@ export default class extends Controller {
       this.spotifyToggleTarget.classList.add("text-white/30")
       this.spotifyToggleTarget.classList.remove("text-white/70")
     }
+  }
+
+  // Spotify search functionality
+  searchSpotify(event) {
+    const query = event.target.value.trim()
+
+    // Debounce search
+    clearTimeout(this.searchTimeout)
+
+    if (query.length < 2) {
+      this.spotifyResultsTarget.classList.add("hidden")
+      return
+    }
+
+    this.spotifySpinnerTarget.classList.remove("hidden")
+
+    this.searchTimeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}&type=playlist`)
+        const data = await response.json()
+
+        if (data.error) {
+          this.spotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">${data.error}</p>`
+        } else if (data.results && data.results.length > 0) {
+          this.renderSpotifyResults(data.results)
+        } else {
+          this.spotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">No playlists found</p>`
+        }
+
+        this.spotifyResultsTarget.classList.remove("hidden")
+      } catch (error) {
+        this.spotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-red-500">Search failed</p>`
+        this.spotifyResultsTarget.classList.remove("hidden")
+      } finally {
+        this.spotifySpinnerTarget.classList.add("hidden")
+      }
+    }, 300)
+  }
+
+  renderSpotifyResults(results) {
+    this.spotifyResultsTarget.innerHTML = results.map(item => `
+      <button type="button"
+              class="w-full p-2 flex items-center gap-3 hover:bg-neutral-50 transition-colors text-left"
+              data-action="click->slideshow#selectSpotifyResult"
+              data-url="${item.url}"
+              data-name="${this.escapeHtml(item.name)}"
+              data-image="${item.image || ''}"
+              data-owner="${this.escapeHtml(item.owner || item.artist || '')}"
+              data-tracks="${item.tracks || ''}">
+        <img src="${item.image || ''}" class="w-10 h-10 rounded object-cover bg-neutral-200" onerror="this.style.display='none'">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-neutral-800 truncate">${this.escapeHtml(item.name)}</p>
+          <p class="text-xs text-neutral-500 truncate">${this.escapeHtml(item.owner || item.artist || '')}${item.tracks ? ` · ${item.tracks} tracks` : ''}</p>
+        </div>
+      </button>
+    `).join('')
+  }
+
+  selectSpotifyResult(event) {
+    const button = event.currentTarget
+    const url = button.dataset.url
+    const name = button.dataset.name
+    const image = button.dataset.image
+    const owner = button.dataset.owner
+    const tracks = button.dataset.tracks
+
+    // Set the URL
+    this.spotifyInputTarget.value = url
+
+    // Show selected state
+    this.spotifySelectedTarget.classList.remove("hidden")
+    this.spotifyResultsTarget.classList.add("hidden")
+    this.spotifySearchTarget.value = ""
+
+    this.spotifySelectedImageTarget.src = image
+    this.spotifySelectedNameTarget.textContent = name
+    this.spotifySelectedMetaTarget.textContent = `${owner}${tracks ? ` · ${tracks} tracks` : ''}`
+  }
+
+  clearSpotifySelection(event) {
+    event.preventDefault()
+    this.spotifyInputTarget.value = ""
+    this.spotifySelectedTarget.classList.add("hidden")
+    this.spotifySearchTarget.focus()
+  }
+
+  escapeHtml(text) {
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 
   showTitleSlide() {
