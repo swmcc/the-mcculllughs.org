@@ -1,5 +1,6 @@
 class PublicPhotosController < ApplicationController
   skip_before_action :authenticate_user!
+  layout "public"
   before_action :set_upload
 
   # GET /t/:short_code - just the thumbnail image
