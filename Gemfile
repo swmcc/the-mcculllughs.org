@@ -21,6 +21,10 @@ gem "thruster", require: false
 gem "turbo-rails"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
+# OAuth for external photo imports
+gem "oauth", "~> 1.1"   # OAuth 1.0a (Flickr)
+gem "oauth2", "~> 2.0"  # OAuth 2.0 (Google, Facebook)
+
 group :development, :test do
   gem "brakeman", require: false
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
