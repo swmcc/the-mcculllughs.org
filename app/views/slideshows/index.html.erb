@@ -21,10 +21,10 @@
 
           <div class="p-4">
             <h3 class="font-medium text-neutral-800 mb-1 truncate"><%= slideshow.title %></h3>
-            <div class="flex items-center text-xs text-neutral-500 mb-3">
+            <div class="flex items-center flex-wrap text-xs text-neutral-500 mb-3">
               <span><%= pluralize(slideshow.uploads.count, 'photo') %></span>
               <span class="mx-2">•</span>
-              <span><%= slideshow.interval %>s interval</span>
+              <span><%= pluralize(slideshow.view_count, 'view') %></span>
               <% if slideshow.spotify_url.present? %>
                 <span class="mx-2">•</span>
                 <svg class="w-4 h-4 text-green-500 inline" viewBox="0 0 24 24" fill="currentColor">

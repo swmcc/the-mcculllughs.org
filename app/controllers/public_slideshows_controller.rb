@@ -1,6 +1,7 @@
 class PublicSlideshowsController < ApplicationController
   def show
     @slideshow = Slideshow.find_by!(short_code: params[:short_code])
+    @slideshow.increment!(:view_count)
     @uploads = @slideshow.uploads
 
     @images_data = @uploads.select { |u| u.file.attached? }.map.with_index do |u, i|
