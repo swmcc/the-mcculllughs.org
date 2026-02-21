@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   # Uploads (for update/destroy actions outside nested route)
   resources :uploads, only: [ :update, :destroy ]
 
+  # Saved slideshows
+  resources :slideshows, only: [ :index, :show, :create, :destroy ]
+
   # External photo imports
   resources :imports, only: [ :index ] do
     collection do

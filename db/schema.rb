@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_092027) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_093527) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -90,6 +90,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_092027) do
     t.index ["status"], name: "index_imports_on_status"
     t.index ["user_id", "provider", "external_album_id"], name: "idx_imports_user_provider_album", unique: true
     t.index ["user_id"], name: "index_imports_on_user_id"
+  end
+
+  create_table "slideshow_uploads", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "position", default: 0
+    t.bigint "slideshow_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "upload_id", null: false
+    t.index ["slideshow_id", "position"], name: "index_slideshow_uploads_on_slideshow_id_and_position"
+    t.index ["slideshow_id"], name: "index_slideshow_uploads_on_slideshow_id"
+    t.index ["upload_id"], name: "index_slideshow_uploads_on_upload_id"
+  end
+
+  create_table "slideshows", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "interval", default: 5
+    t.string "spotify_url"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_slideshows_on_user_id"
   end
 
   create_table "solid_queue_blocked_executions", force: :cascade do |t|
@@ -256,6 +278,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_092027) do
   add_foreign_key "imports", "external_connections"
   add_foreign_key "imports", "galleries"
   add_foreign_key "imports", "users"
+  add_foreign_key "slideshow_uploads", "slideshows"
+  add_foreign_key "slideshow_uploads", "uploads"
+  add_foreign_key "slideshows", "users"
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

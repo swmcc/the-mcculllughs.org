@@ -1,0 +1,130 @@
+<div class="fixed inset-0 bg-black"
+     data-controller="slideshow"
+     data-slideshow-images-value="<%= @images_data.to_json %>"
+     data-slideshow-gallery-title-value="<%= @slideshow.title %>"
+     data-slideshow-gallery-description-value="<%= @slideshow.description %>"
+     data-slideshow-interval-value="<%= @slideshow.interval %>"
+     data-slideshow-spotify-url-value="<%= @slideshow.spotify_url %>"
+     data-slideshow-autoplay-value="true"
+     data-action="keydown@window->slideshow#keydown">
+
+  <!-- Top bar -->
+  <div class="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-20">
+    <%= link_to slideshows_path, class: "p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10" do %>
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    <% end %>
+
+    <span data-slideshow-target="counter" class="text-white/70 text-sm"></span>
+
+    <!-- Spotify toggle button -->
+    <button data-slideshow-target="spotifyToggle"
+            data-action="click->slideshow#toggleSpotify"
+            class="<%= @slideshow.spotify_url.present? ? '' : 'hidden' %> p-2 text-white/70 hover:text-green-400 transition-colors rounded-lg hover:bg-white/10">
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Spotify player (bottom-left) -->
+  <div data-slideshow-target="spotifyPlayer"
+       class="hidden absolute bottom-24 left-4 z-30 rounded-xl overflow-hidden shadow-2xl">
+  </div>
+
+  <!-- Title slide -->
+  <div data-slideshow-target="titleSlide" class="absolute inset-0 flex items-center justify-center">
+    <div class="text-center px-8 max-w-4xl">
+      <h1 data-slideshow-target="galleryTitle" class="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6"><%= @slideshow.title %></h1>
+      <p data-slideshow-target="galleryDescription" class="text-xl sm:text-2xl text-white/70 leading-relaxed"><%= @slideshow.description %></p>
+      <div class="mt-12 text-white/40 text-sm">
+        <span data-slideshow-target="photoCount"><%= pluralize(@uploads.count, 'photo') %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image area -->
+  <div data-slideshow-target="imageArea" class="hidden absolute inset-0 flex items-center justify-center">
+    <button data-action="click->slideshow#manualPrev" class="absolute left-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+    </button>
+
+    <img data-slideshow-target="image" src="" alt="" class="max-w-[90vw] max-h-[90vh] object-contain">
+
+    <button data-action="click->slideshow#manualNext" class="absolute right-4 top-1/2 -translate-y-1/2 p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Bottom info bar -->
+  <div data-slideshow-target="infoBar" class="hidden absolute bottom-0 left-0 right-0 z-20">
+    <div class="bg-gradient-to-t from-black/80 to-transparent px-6 pt-16 pb-6">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex items-center justify-between mb-2">
+          <h3 data-slideshow-target="title" class="text-white text-lg font-medium"></h3>
+          <span data-slideshow-target="dateTaken" class="text-white/50 text-sm"></span>
+        </div>
+        <p data-slideshow-target="caption" class="text-white/70 text-sm mb-4"></p>
+
+        <!-- Controls -->
+        <div class="flex justify-center">
+          <button data-action="click->slideshow#togglePause"
+                  data-slideshow-target="pauseBtn"
+                  class="p-3 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slideshow modal target (required but hidden for saved slideshows) -->
+  <div data-slideshow-target="modal" class="hidden"></div>
+  <div data-slideshow-target="configModal" class="hidden"></div>
+</div>
+
+<style>
+  /* Slideshow transitions */
+  [data-slideshow-target="image"] {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Fade */
+  .fade-out { opacity: 0; }
+  .fade-in { animation: fadeIn 0.5s ease forwards; }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Slide left */
+  .slide-out-left { transform: translateX(-100%); opacity: 0; }
+  .slide-in-left { animation: slideInLeft 0.5s ease forwards; }
+  @keyframes slideInLeft {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Slide right */
+  .slide-out-right { transform: translateX(100%); opacity: 0; }
+  .slide-in-right { animation: slideInRight 0.5s ease forwards; }
+  @keyframes slideInRight {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Zoom */
+  .zoom-out { transform: scale(0.8); opacity: 0; }
+  .zoom-in { animation: zoomIn 0.5s ease forwards; }
+  @keyframes zoomIn {
+    from { transform: scale(1.2); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+</style>
