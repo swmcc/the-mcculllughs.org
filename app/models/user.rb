@@ -7,9 +7,7 @@ class User < ApplicationRecord
   # Roles
   enum :role, { member: 0, admin: 1 }, default: :member
 
-  # Encrypted credentials
-  encrypts :spotify_client_id
-  encrypts :spotify_client_secret
+  # Spotify credentials (stored plain text for now)
 
   # Validations
   validates :name, presence: true
