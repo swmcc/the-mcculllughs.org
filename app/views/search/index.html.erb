@@ -1,5 +1,6 @@
 <%
-  images_data = @results.map.with_index do |u, i|
+  images_data = @results.to_a.map.with_index do |u, i|
+    next unless u.file.attached?
     {
       id: u.id,
       index: i,
@@ -13,7 +14,7 @@
       medium: url_for(u.file.variant(resize_to_limit: [1024, 1024])),
       small: url_for(u.file.variant(resize_to_limit: [640, 640]))
     }
-  end
+  end.compact
 %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
@@ -56,6 +57,7 @@
   <% if @results.any? %>
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
       <% @results.each_with_index do |upload, index| %>
+        <% next unless upload.file.attached? %>
         <a href="#" data-action="click->search-lightbox#open" data-index="<%= index %>" class="group block">
           <div class="relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
             <%= image_tag upload.file.variant(resize_to_fill: [400, 400]),
