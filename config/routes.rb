@@ -14,6 +14,7 @@ Rails.application.routes.draw do
 
   # Public photo sharing (no auth required)
   get "p/:short_code", to: "public_photos#show", as: :public_photo
+  patch "p/:short_code", to: "public_photos#update"
 
   # Admin namespace
   namespace :admin do

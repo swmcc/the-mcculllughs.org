@@ -7,7 +7,10 @@
   <meta name="twitter:card" content="summary_large_image">
 <% end %>
 
-<div class="min-h-screen bg-black flex flex-col">
+<div class="min-h-screen bg-black flex flex-col"
+     data-controller="public-toggle"
+     data-public-toggle-short-code-value="<%= @upload.short_code %>"
+     data-public-toggle-is-public-value="<%= @upload.is_public? %>">
   <!-- Header -->
   <div class="p-4 flex items-center justify-between">
     <%= link_to root_path, class: "text-white/70 hover:text-white transition-colors" do %>
@@ -19,6 +22,26 @@
         <span class="text-white/50 text-sm">
           <%= @upload.date_taken.strftime("%d %b %Y") %>
         </span>
+      <% end %>
+
+      <% if can_edit? %>
+        <!-- Public toggle -->
+        <div class="flex items-center gap-2">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input type="checkbox"
+                   data-public-toggle-target="checkbox"
+                   data-action="change->public-toggle#toggle"
+                   <%= "checked" if @upload.is_public? %>
+                   class="sr-only peer">
+            <div class="relative w-9 h-5 bg-white/20 rounded-full peer peer-checked:bg-green-500 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+            <span class="text-white/50 text-xs group-hover:text-white/70 transition-colors" data-public-toggle-target="label">
+              <%= @upload.is_public? ? "Public" : "Private" %>
+            </span>
+          </label>
+          <span data-public-toggle-target="status" class="text-xs"></span>
+        </div>
+
+        <div class="w-px h-5 bg-white/20"></div>
       <% end %>
 
       <%= link_to url_for(@upload.file), download: "", class: "p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors", title: "Download" do %>
