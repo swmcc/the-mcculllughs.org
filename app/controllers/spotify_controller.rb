@@ -10,7 +10,7 @@ class SpotifyController < ApplicationController
       return
     end
 
-    service = SpotifyService.new
+    service = SpotifyService.new(current_user)
 
     unless service.configured?
       render json: { error: "Spotify is not configured" }, status: :service_unavailable

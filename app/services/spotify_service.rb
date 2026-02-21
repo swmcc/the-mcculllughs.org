@@ -2,9 +2,10 @@ class SpotifyService
   BASE_URL = "https://api.spotify.com/v1"
   TOKEN_URL = "https://accounts.spotify.com/api/token"
 
-  def initialize
-    @client_id = Rails.application.credentials.dig(:spotify, :client_id)
-    @client_secret = Rails.application.credentials.dig(:spotify, :client_secret)
+  def initialize(user)
+    @user = user
+    @client_id = user&.spotify_client_id
+    @client_secret = user&.spotify_client_secret
   end
 
   def configured?
@@ -37,8 +38,9 @@ class SpotifyService
   private
 
   def fetch_access_token
-    # Check cache first
-    cached = Rails.cache.read("spotify_access_token")
+    # Check cache first (user-specific)
+    cache_key = "spotify_access_token_#{@user&.id}"
+    cached = Rails.cache.read(cache_key)
     return cached if cached
 
     uri = URI(TOKEN_URL)
@@ -56,7 +58,7 @@ class SpotifyService
       expires_in = data["expires_in"] || 3600
 
       # Cache token (expire 1 minute early to be safe)
-      Rails.cache.write("spotify_access_token", token, expires_in: expires_in - 60)
+      Rails.cache.write(cache_key, token, expires_in: expires_in - 60)
       token
     end
   end
