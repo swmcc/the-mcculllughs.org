@@ -47,13 +47,16 @@
                 <span>Upload</span>
               <% end %>
 
-              <div class="relative group" data-controller="dropdown">
-                <button class="flex items-center space-x-2 text-sm text-white/70 hover:text-white transition-colors">
+              <div class="relative" data-controller="dropdown">
+                <button data-action="click->dropdown#toggle" class="flex items-center space-x-2 text-sm text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
                   <div class="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
                     <span class="text-xs font-medium"><%= current_user.name.first %></span>
                   </div>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
                 </button>
-                <div class="hidden group-hover:block absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-xl border border-white/10 py-1">
+                <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-neutral-800 rounded-lg shadow-xl border border-white/10 py-1">
                   <%= link_to edit_user_registration_path, class: "block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
                     Settings
                   <% end %>
