@@ -12,6 +12,9 @@ Rails.application.routes.draw do
   # Uploads (for update/destroy actions outside nested route)
   resources :uploads, only: [ :update, :destroy ]
 
+  # Public photo sharing (no auth required)
+  get "p/:short_code", to: "public_photos#show", as: :public_photo
+
   # Admin namespace
   namespace :admin do
     root "dashboard#index"

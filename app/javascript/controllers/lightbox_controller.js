@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "image", "title", "caption", "dateTaken", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "dateTakenInput", "saveStatus", "noInfo"]
+  static targets = ["modal", "image", "title", "caption", "dateTaken", "counter", "downloadMenu", "prevBtn", "nextBtn", "titleInput", "captionInput", "dateTakenInput", "saveStatus", "noInfo", "publicToggle", "publicLabel", "copyLinkBtn", "copyLinkText"]
   static values = {
     images: Array,
     index: { type: Number, default: 0 },
@@ -53,6 +53,12 @@ export default class extends Controller {
         this.dateTakenTarget.textContent = ""
         this.dateTakenTarget.classList.add("hidden")
       }
+    }
+
+    // Update public toggle
+    if (this.hasPublicToggleTarget) {
+      this.publicToggleTarget.checked = image.is_public || false
+      this.updatePublicUI(image.is_public)
     }
 
     // Update read-only display
@@ -214,6 +220,106 @@ export default class extends Controller {
 
   stopPropagation(event) {
     event.stopPropagation()
+  }
+
+  updatePublicUI(isPublic) {
+    if (this.hasPublicLabelTarget) {
+      this.publicLabelTarget.textContent = isPublic ? "Public" : "Private"
+    }
+    if (this.hasCopyLinkBtnTarget) {
+      this.copyLinkBtnTarget.classList.toggle("hidden", !isPublic)
+      this.copyLinkBtnTarget.classList.toggle("flex", isPublic)
+    }
+  }
+
+  async handlePublicToggle(event) {
+    if (!this.canEditValue) return
+
+    const isPublic = event.target.checked
+    const image = this.imagesValue[this.indexValue]
+
+    this.updatePublicUI(isPublic)
+
+    if (this.hasSaveStatusTarget) {
+      this.saveStatusTarget.textContent = "Saving..."
+      this.saveStatusTarget.className = "text-white/50 text-xs"
+    }
+
+    try {
+      const response = await fetch(`/uploads/${image.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector("[name='csrf-token']").content
+        },
+        body: JSON.stringify({ upload: { is_public: isPublic } })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        // Update local data
+        const images = [...this.imagesValue]
+        images[this.indexValue] = {
+          ...images[this.indexValue],
+          is_public: isPublic,
+          short_code: data.short_code
+        }
+        this.imagesValue = images
+
+        if (this.hasSaveStatusTarget) {
+          this.saveStatusTarget.textContent = "Saved"
+          this.saveStatusTarget.className = "text-green-400 text-xs"
+          setTimeout(() => {
+            if (this.hasSaveStatusTarget) this.saveStatusTarget.textContent = ""
+          }, 2000)
+        }
+      } else {
+        throw new Error("Save failed")
+      }
+    } catch (error) {
+      // Revert toggle on error
+      event.target.checked = !isPublic
+      this.updatePublicUI(!isPublic)
+
+      if (this.hasSaveStatusTarget) {
+        this.saveStatusTarget.textContent = "Failed to save"
+        this.saveStatusTarget.className = "text-red-400 text-xs"
+      }
+    }
+  }
+
+  async copyLink(event) {
+    event.stopPropagation()
+    const image = this.imagesValue[this.indexValue]
+
+    if (!image.short_code) return
+
+    const url = `${window.location.origin}/p/${image.short_code}`
+
+    try {
+      await navigator.clipboard.writeText(url)
+      if (this.hasCopyLinkTextTarget) {
+        this.copyLinkTextTarget.textContent = "Copied!"
+        setTimeout(() => {
+          if (this.hasCopyLinkTextTarget) this.copyLinkTextTarget.textContent = "Copy link"
+        }, 2000)
+      }
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = url
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand("copy")
+      document.body.removeChild(textArea)
+
+      if (this.hasCopyLinkTextTarget) {
+        this.copyLinkTextTarget.textContent = "Copied!"
+        setTimeout(() => {
+          if (this.hasCopyLinkTextTarget) this.copyLinkTextTarget.textContent = "Copy link"
+        }, 2000)
+      }
+    }
   }
 
   keydown(event) {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_233656) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_020506) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -177,10 +177,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_233656) do
     t.datetime "created_at", null: false
     t.date "date_taken"
     t.bigint "gallery_id", null: false
+    t.boolean "is_public", default: false, null: false
+    t.string "short_code", null: false
     t.string "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["gallery_id"], name: "index_uploads_on_gallery_id"
+    t.index ["short_code"], name: "index_uploads_on_short_code", unique: true
     t.index ["user_id"], name: "index_uploads_on_user_id"
   end
 
