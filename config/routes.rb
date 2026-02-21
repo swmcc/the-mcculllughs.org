@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   # Uploads (for update/destroy actions outside nested route)
   resources :uploads, only: [ :update, :destroy ]
 
+  # Saved slideshows
+  resources :slideshows, only: [ :index, :show, :create, :destroy ]
+
   # External photo imports
   resources :imports, only: [ :index ] do
     collection do
@@ -42,6 +45,9 @@ Rails.application.routes.draw do
   get "t/:short_code", to: "public_photos#thumbnail", as: :public_thumbnail
   get "p/:short_code", to: "public_photos#show", as: :public_photo
   patch "p/:short_code", to: "public_photos#update"
+
+  # Public slideshow sharing (no auth required)
+  get "s/:short_code", to: "public_slideshows#show", as: :public_slideshow
 
   # Admin namespace
   namespace :admin do

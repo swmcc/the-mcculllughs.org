@@ -1,12 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle", "spotifySearch", "spotifyResults", "spotifySpinner", "spotifySelected", "spotifySelectedImage", "spotifySelectedName", "spotifySelectedMeta"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle", "spotifySearch", "spotifyResults", "spotifySpinner", "spotifySelected", "spotifySelectedImage", "spotifySelectedName", "spotifySelectedMeta", "saveModal", "saveTitleInput", "saveDescriptionInput", "saveIntervalInput", "saveSpotifySearch", "saveSpotifyResults", "saveSpotifySpinner", "saveSpotifySelected", "saveSpotifySelectedImage", "saveSpotifySelectedName", "saveSpotifySelectedMeta", "saveSpotifyInput", "startBtn"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 },
     galleryTitle: String,
-    galleryDescription: String
+    galleryDescription: String,
+    spotifyUrl: String,
+    autoplay: { type: Boolean, default: false }
   }
 
   // Available transitions
@@ -19,6 +21,49 @@ export default class extends Controller {
     this.spotifyUrl = null
     this.spotifyVisible = true
     this.searchTimeout = null
+    this.saveSearchTimeout = null
+
+    // For saved slideshows, just show the title slide and wait for start button
+    // (autoplayValue is set but we don't auto-start - user must click to satisfy browser autoplay policy)
+  }
+
+  // Called when user clicks "Start Slideshow" on saved slideshow title screen
+  startSavedSlideshow(event) {
+    if (event) event.preventDefault()
+
+    // Hide the start button
+    if (this.hasStartBtnTarget) {
+      this.startBtnTarget.classList.add("hidden")
+    }
+
+    // Set up Spotify with autoplay (user has now interacted)
+    this.setupSpotifyFromUrl()
+
+    // Start the slideshow timer
+    this.startTimer()
+  }
+
+  setupSpotifyFromUrl() {
+    if (!this.spotifyUrlValue) return
+
+    // Use autoplay for saved slideshows
+    const embedUrl = this.convertToSpotifyEmbed(this.spotifyUrlValue, true)
+    if (!embedUrl) return
+
+    this.spotifyPlayerTarget.innerHTML = `
+      <iframe
+        src="${embedUrl}"
+        width="300"
+        height="80"
+        frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        class="rounded-xl">
+      </iframe>
+    `
+    this.spotifyPlayerTarget.classList.remove("hidden")
+    this.spotifyToggleTarget.classList.remove("hidden")
+    this.spotifyVisible = true
   }
 
   disconnect() {
@@ -89,14 +134,15 @@ export default class extends Controller {
     this.spotifyVisible = true
   }
 
-  convertToSpotifyEmbed(url) {
+  convertToSpotifyEmbed(url, autoplay = false) {
     // Convert Spotify URLs to embed format
     // https://open.spotify.com/playlist/ABC -> https://open.spotify.com/embed/playlist/ABC
     // https://open.spotify.com/album/ABC -> https://open.spotify.com/embed/album/ABC
     // https://open.spotify.com/track/ABC -> https://open.spotify.com/embed/track/ABC
     const match = url.match(/open\.spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/)
     if (match) {
-      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`
+      const autoplayParam = autoplay ? "&autoplay=1" : ""
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0${autoplayParam}`
     }
     return null
   }
@@ -440,9 +486,149 @@ export default class extends Controller {
     return `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
   }
 
+  // Save Modal Methods
+  openSaveModal(event) {
+    if (event) event.preventDefault()
+    if (this.imagesValue.length === 0) {
+      alert("No photos in this gallery")
+      return
+    }
+    this.saveModalTarget.classList.remove("hidden")
+    this.saveTitleInputTarget.focus()
+  }
+
+  closeSaveModal(event) {
+    if (event) event.preventDefault()
+    this.saveModalTarget.classList.add("hidden")
+    this.clearSaveSpotifySelection()
+  }
+
+  async saveSlideshow(event) {
+    event.preventDefault()
+
+    const title = this.saveTitleInputTarget.value.trim()
+    if (!title) {
+      alert("Please enter a title")
+      return
+    }
+
+    const data = {
+      slideshow: {
+        title: title,
+        description: this.saveDescriptionInputTarget.value.trim(),
+        spotify_url: this.saveSpotifyInputTarget.value,
+        interval: parseInt(this.saveIntervalInputTarget.value) || 5
+      },
+      upload_ids: this.imagesValue.map(img => img.id)
+    }
+
+    try {
+      const response = await fetch('/slideshows', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        window.location.href = result.redirect
+      } else {
+        const error = await response.json()
+        alert(error.errors ? error.errors.join(", ") : "Failed to save slideshow")
+      }
+    } catch (error) {
+      alert("Failed to save slideshow")
+    }
+  }
+
+  // Spotify search for save modal
+  searchSpotifySave(event) {
+    const query = event.target.value.trim()
+    clearTimeout(this.saveSearchTimeout)
+
+    if (query.length < 2) {
+      this.saveSpotifyResultsTarget.classList.add("hidden")
+      return
+    }
+
+    this.saveSpotifySpinnerTarget.classList.remove("hidden")
+
+    this.saveSearchTimeout = setTimeout(async () => {
+      try {
+        const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}&type=track`)
+        const data = await response.json()
+
+        if (data.error) {
+          this.saveSpotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">${data.error}</p>`
+        } else if (data.results && data.results.length > 0) {
+          this.renderSaveSpotifyResults(data.results)
+        } else {
+          this.saveSpotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">No songs found</p>`
+        }
+
+        this.saveSpotifyResultsTarget.classList.remove("hidden")
+      } catch (error) {
+        this.saveSpotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-red-500">Search failed</p>`
+        this.saveSpotifyResultsTarget.classList.remove("hidden")
+      } finally {
+        this.saveSpotifySpinnerTarget.classList.add("hidden")
+      }
+    }, 300)
+  }
+
+  renderSaveSpotifyResults(results) {
+    this.saveSpotifyResultsTarget.innerHTML = results.map(item => `
+      <button type="button"
+              class="w-full p-2 flex items-center gap-3 hover:bg-neutral-50 transition-colors text-left"
+              data-action="click->slideshow#selectSaveSpotifyResult"
+              data-url="${item.url}"
+              data-name="${this.escapeHtml(item.name)}"
+              data-image="${item.image || ''}"
+              data-artist="${this.escapeHtml(item.artist || '')}">
+        <img src="${item.image || ''}" class="w-10 h-10 rounded object-cover bg-neutral-200" onerror="this.style.display='none'">
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-neutral-800 truncate">${this.escapeHtml(item.name)}</p>
+          <p class="text-xs text-neutral-500 truncate">${this.escapeHtml(item.artist || '')}</p>
+        </div>
+      </button>
+    `).join('')
+  }
+
+  selectSaveSpotifyResult(event) {
+    const button = event.currentTarget
+    const url = button.dataset.url
+    const name = button.dataset.name
+    const image = button.dataset.image
+    const artist = button.dataset.artist
+
+    this.saveSpotifyInputTarget.value = url
+    this.saveSpotifySelectedTarget.classList.remove("hidden")
+    this.saveSpotifyResultsTarget.classList.add("hidden")
+    this.saveSpotifySearchTarget.value = ""
+
+    this.saveSpotifySelectedImageTarget.src = image
+    this.saveSpotifySelectedNameTarget.textContent = name
+    this.saveSpotifySelectedMetaTarget.textContent = artist
+  }
+
+  clearSaveSpotifySelection(event) {
+    if (event) event.preventDefault()
+    this.saveSpotifyInputTarget.value = ""
+    this.saveSpotifySelectedTarget.classList.add("hidden")
+  }
+
   keydown(event) {
+    // Save modal open
+    if (this.hasSaveModalTarget && !this.saveModalTarget.classList.contains("hidden")) {
+      if (event.key === "Escape") this.closeSaveModal()
+      return
+    }
+
     // Config modal open
-    if (!this.configModalTarget.classList.contains("hidden")) {
+    if (this.hasConfigModalTarget && !this.configModalTarget.classList.contains("hidden")) {
       if (event.key === "Escape") this.closeConfig()
       if (event.key === "Enter") this.start(event)
       return

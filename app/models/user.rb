@@ -18,6 +18,7 @@ class User < ApplicationRecord
   has_many :uploads, dependent: :destroy
   has_many :external_connections, dependent: :destroy
   has_many :imports, dependent: :destroy
+  has_many :slideshows, dependent: :destroy
 
   # External connections helpers
   def connected_to?(provider)
