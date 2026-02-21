@@ -27,7 +27,7 @@
       <nav class="bg-black/80 backdrop-blur-md border-b border-white/10 fixed top-0 w-full z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="flex justify-between items-center h-14">
-            <div class="flex items-center space-x-8">
+            <div class="flex items-center">
               <%= link_to root_path, class: "flex items-center group" do %>
                 <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center hover:scale-105 transition-transform">
                   <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,17 +35,9 @@
                   </svg>
                 </div>
               <% end %>
-              <%= link_to "Galleries", galleries_path, class: "text-sm text-white/70 hover:text-white transition-colors" %>
             </div>
 
             <div class="flex items-center space-x-3">
-              <%= link_to new_gallery_path, class: "flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" do %>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                <span>Upload</span>
-              <% end %>
-
               <div class="relative" data-controller="dropdown">
                 <button data-action="click->dropdown#toggle" class="flex items-center space-x-2 text-sm text-white/70 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10">
                   <div class="w-7 h-7 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
