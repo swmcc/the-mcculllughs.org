@@ -132,7 +132,7 @@ export default class extends Controller {
 
     this.searchTimeout = setTimeout(async () => {
       try {
-        const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}&type=playlist`)
+        const response = await fetch(`/spotify/search?q=${encodeURIComponent(query)}&type=track`)
         const data = await response.json()
 
         if (data.error) {
@@ -140,7 +140,7 @@ export default class extends Controller {
         } else if (data.results && data.results.length > 0) {
           this.renderSpotifyResults(data.results)
         } else {
-          this.spotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">No playlists found</p>`
+          this.spotifyResultsTarget.innerHTML = `<p class="p-3 text-sm text-neutral-500">No songs found</p>`
         }
 
         this.spotifyResultsTarget.classList.remove("hidden")
@@ -161,12 +161,11 @@ export default class extends Controller {
               data-url="${item.url}"
               data-name="${this.escapeHtml(item.name)}"
               data-image="${item.image || ''}"
-              data-owner="${this.escapeHtml(item.owner || item.artist || '')}"
-              data-tracks="${item.tracks || ''}">
+              data-artist="${this.escapeHtml(item.artist || '')}">
         <img src="${item.image || ''}" class="w-10 h-10 rounded object-cover bg-neutral-200" onerror="this.style.display='none'">
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-neutral-800 truncate">${this.escapeHtml(item.name)}</p>
-          <p class="text-xs text-neutral-500 truncate">${this.escapeHtml(item.owner || item.artist || '')}${item.tracks ? ` · ${item.tracks} tracks` : ''}</p>
+          <p class="text-xs text-neutral-500 truncate">${this.escapeHtml(item.artist || '')}</p>
         </div>
       </button>
     `).join('')
@@ -177,8 +176,7 @@ export default class extends Controller {
     const url = button.dataset.url
     const name = button.dataset.name
     const image = button.dataset.image
-    const owner = button.dataset.owner
-    const tracks = button.dataset.tracks
+    const artist = button.dataset.artist
 
     // Set the URL
     this.spotifyInputTarget.value = url
@@ -190,7 +188,7 @@ export default class extends Controller {
 
     this.spotifySelectedImageTarget.src = image
     this.spotifySelectedNameTarget.textContent = name
-    this.spotifySelectedMetaTarget.textContent = `${owner}${tracks ? ` · ${tracks} tracks` : ''}`
+    this.spotifySelectedMetaTarget.textContent = artist
   }
 
   clearSpotifySelection(event) {
