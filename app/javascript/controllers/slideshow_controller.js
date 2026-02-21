@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar"]
+  static targets = ["modal", "configModal", "image", "counter", "intervalInput", "title", "caption", "dateTaken", "pauseBtn", "titleSlide", "imageArea", "galleryTitle", "galleryDescription", "photoCount", "infoBar", "spotifyInput", "spotifyPlayer", "spotifyToggle"]
   static values = {
     images: Array,
     interval: { type: Number, default: 5 },
@@ -16,6 +16,8 @@ export default class extends Controller {
     this.currentIndex = -1 // -1 = title slide, 0+ = photos
     this.timer = null
     this.lastTransition = null
+    this.spotifyUrl = null
+    this.spotifyVisible = true
   }
 
   disconnect() {
@@ -45,10 +47,72 @@ export default class extends Controller {
     this.intervalValue = interval
     this.currentIndex = -1 // Start with title slide
 
+    // Set up Spotify if URL provided
+    this.setupSpotify()
+
     this.closeConfig()
     this.showSlideshow()
     this.showTitleSlide()
     this.startTimer()
+  }
+
+  setupSpotify() {
+    const url = this.spotifyInputTarget.value.trim()
+    if (!url) {
+      this.spotifyPlayerTarget.classList.add("hidden")
+      this.spotifyToggleTarget.classList.add("hidden")
+      return
+    }
+
+    const embedUrl = this.convertToSpotifyEmbed(url)
+    if (!embedUrl) {
+      this.spotifyPlayerTarget.classList.add("hidden")
+      this.spotifyToggleTarget.classList.add("hidden")
+      return
+    }
+
+    // Create iframe
+    this.spotifyPlayerTarget.innerHTML = `
+      <iframe
+        src="${embedUrl}"
+        width="300"
+        height="80"
+        frameborder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        class="rounded-xl">
+      </iframe>
+    `
+    this.spotifyPlayerTarget.classList.remove("hidden")
+    this.spotifyToggleTarget.classList.remove("hidden")
+    this.spotifyVisible = true
+  }
+
+  convertToSpotifyEmbed(url) {
+    // Convert Spotify URLs to embed format
+    // https://open.spotify.com/playlist/ABC -> https://open.spotify.com/embed/playlist/ABC
+    // https://open.spotify.com/album/ABC -> https://open.spotify.com/embed/album/ABC
+    // https://open.spotify.com/track/ABC -> https://open.spotify.com/embed/track/ABC
+    const match = url.match(/open\.spotify\.com\/(playlist|album|track)\/([a-zA-Z0-9]+)/)
+    if (match) {
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`
+    }
+    return null
+  }
+
+  toggleSpotify(event) {
+    event.preventDefault()
+    event.stopPropagation()
+    this.spotifyVisible = !this.spotifyVisible
+    if (this.spotifyVisible) {
+      this.spotifyPlayerTarget.classList.remove("hidden")
+      this.spotifyToggleTarget.classList.remove("text-white/30")
+      this.spotifyToggleTarget.classList.add("text-white/70")
+    } else {
+      this.spotifyPlayerTarget.classList.add("hidden")
+      this.spotifyToggleTarget.classList.add("text-white/30")
+      this.spotifyToggleTarget.classList.remove("text-white/70")
+    }
   }
 
   showTitleSlide() {
@@ -98,6 +162,11 @@ export default class extends Controller {
     this.stop()
     this.modalTarget.classList.add("hidden")
     document.body.style.overflow = ""
+
+    // Clean up Spotify player
+    this.spotifyPlayerTarget.innerHTML = ""
+    this.spotifyPlayerTarget.classList.add("hidden")
+    this.spotifyToggleTarget.classList.add("hidden")
   }
 
   showImage(withTransition = true) {
