@@ -2,7 +2,7 @@
   <!-- Social Media Meta Tags -->
   <meta property="og:title" content="<%= @upload.title.presence || 'Shared Photo' %>">
   <meta property="og:description" content="<%= @upload.caption.presence || 'A photo shared from The McCulloughs' %>">
-  <meta property="og:image" content="<%= url_for(@upload.file.variant(resize_to_limit: [1200, 630])) %>">
+  <meta property="og:image" content="<%= url_for(@upload.file) %>">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
 <% end %>
@@ -54,9 +54,10 @@
 
   <!-- Photo -->
   <div class="flex-1 flex items-center justify-center p-4">
-    <%= image_tag @upload.file.variant(resize_to_limit: [1920, 1080]),
+    <%= image_tag url_for(@upload.file),
         class: "max-w-full max-h-[80vh] object-contain",
-        alt: @upload.title %>
+        alt: @upload.title,
+        loading: "eager" %>
   </div>
 
   <!-- Info -->
