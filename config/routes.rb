@@ -20,7 +20,11 @@ Rails.application.routes.draw do
   end
 
   # Uploads (for update/destroy actions outside nested route)
-  resources :uploads, only: [ :update, :destroy ]
+  resources :uploads, only: [ :update, :destroy ] do
+    member do
+      patch :set_cover
+    end
+  end
 
   # Saved slideshows
   resources :slideshows, only: [ :index, :show, :create, :edit, :update, :destroy ]

@@ -1,6 +1,6 @@
 class UploadsController < ApplicationController
   before_action :set_gallery, only: [ :create ]
-  before_action :set_upload, only: [ :update, :destroy ]
+  before_action :set_upload, only: [ :update, :destroy, :set_cover ]
   before_action :authorize_edit!, only: [ :update ]
 
   def create
@@ -65,6 +65,18 @@ class UploadsController < ApplicationController
 
     respond_to do |format|
       format.html { redirect_to gallery, notice: "Upload was successfully deleted." }
+      format.turbo_stream
+    end
+  end
+
+  def set_cover
+    @gallery = @upload.gallery
+    @previous_cover = @gallery.cover_upload
+
+    @gallery.update!(cover_upload: @upload)
+
+    respond_to do |format|
+      format.html { redirect_to @gallery, notice: "Cover photo updated." }
       format.turbo_stream
     end
   end
