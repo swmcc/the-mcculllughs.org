@@ -24,8 +24,8 @@
         <%= link_to gallery, class: "group block" do %>
           <div class="bg-white rounded-xl overflow-hidden border border-neutral-200 shadow-sm hover:shadow-xl hover:border-blue-200 hover:-translate-y-1 transition-all duration-300">
             <div class="aspect-[4/3] bg-neutral-100 relative overflow-hidden">
-              <% if gallery.uploads.first&.file&.attached? %>
-                <%= image_tag upload_variant_url(gallery.uploads.first, :medium),
+              <% if gallery.cover_photo&.file&.attached? %>
+                <%= image_tag upload_variant_url(gallery.cover_photo, :medium),
                     class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-500",
                     loading: "lazy" %>
                 <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
