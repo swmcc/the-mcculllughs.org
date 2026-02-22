@@ -21,6 +21,9 @@ gem "thruster", require: false
 gem "turbo-rails"
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
+# pgvector support for similarity search
+gem "neighbor"
+
 # OAuth for external photo imports
 gem "oauth", "~> 1.1"   # OAuth 1.0a (Flickr)
 gem "oauth2", "~> 2.0"  # OAuth 2.0 (Google, Facebook)
