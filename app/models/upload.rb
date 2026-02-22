@@ -1,4 +1,6 @@
 class Upload < ApplicationRecord
+  include Neighbor::Model
+
   belongs_to :user
   belongs_to :gallery
   belongs_to :import, optional: true
@@ -11,11 +13,15 @@ class Upload < ApplicationRecord
   before_validation :generate_short_code, on: :create
   after_commit :process_media, on: :create
 
+  # Vector embedding for similarity search
+  has_neighbors :embedding
+
   # Validations
   validates :file, presence: true
   validates :user, presence: true
   validates :gallery, presence: true
   validates :short_code, presence: true, uniqueness: true
+  validates :analysis_status, inclusion: { in: %w[pending processing completed failed] }
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }
@@ -24,9 +30,54 @@ class Upload < ApplicationRecord
   scope :publicly_visible, -> { where(is_public: true) }
   scope :from_import, -> { where.not(import_id: nil) }
 
+  # AI analysis scopes
+  scope :analysis_pending, -> { where(analysis_status: "pending") }
+  scope :analysis_processing, -> { where(analysis_status: "processing") }
+  scope :analysis_completed, -> { where(analysis_status: "completed") }
+  scope :analysis_failed, -> { where(analysis_status: "failed") }
+  scope :needs_analysis, -> { analysis_pending.images }
+  scope :with_embedding, -> { where.not(embedding: nil) }
+
   # Import helpers
   def imported?
     external_photo_id.present?
+  end
+
+  # AI analysis helpers
+  def analyzed?
+    analysis_status == "completed"
+  end
+
+  def mark_analysis_started!
+    update!(analysis_status: "processing")
+  end
+
+  def complete_analysis!(analysis_data, embedding_vector, version)
+    update!(
+      analysis_status: "completed",
+      ai_analysis: analysis_data,
+      embedding: embedding_vector,
+      analysis_version: version,
+      analyzed_at: Time.current,
+      analysis_error: nil
+    )
+  end
+
+  def fail_analysis!(error_message)
+    update!(
+      analysis_status: "failed",
+      analysis_error: error_message
+    )
+  end
+
+  def find_similar(limit: 10)
+    return Upload.none unless embedding.present?
+
+    Upload
+      .where.not(id: id)
+      .with_embedding
+      .nearest_neighbors(:embedding, embedding, distance: :cosine)
+      .limit(limit)
   end
 
   # Public URL helper
