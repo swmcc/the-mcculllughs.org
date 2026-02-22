@@ -10,9 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "vector"
+
+  create_table "_vector_smoketest", force: :cascade do |t|
+    t.vector "embedding", limit: 3
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -40,6 +45,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "api_keys", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.string "key", null: false
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.datetime "revoked_at"
+    t.string "scope", default: "admin", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["key"], name: "index_api_keys_on_key", unique: true
+    t.index ["user_id"], name: "index_api_keys_on_user_id"
   end
 
   create_table "external_connections", force: :cascade do |t|
@@ -239,9 +258,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
   end
 
   create_table "uploads", force: :cascade do |t|
+    t.jsonb "ai_analysis", default: {}
+    t.text "analysis_error"
+    t.string "analysis_status", default: "pending", null: false
+    t.string "analysis_version"
+    t.datetime "analyzed_at"
     t.text "caption"
     t.datetime "created_at", null: false
     t.date "date_taken"
+    t.vector "embedding", limit: 768
     t.string "external_photo_id"
     t.bigint "gallery_id", null: false
     t.bigint "import_id"
@@ -251,6 +276,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["ai_analysis"], name: "index_uploads_on_ai_analysis", using: :gin
+    t.index ["analysis_status"], name: "index_uploads_on_analysis_status"
+    t.index ["embedding"], name: "index_uploads_on_embedding", opclass: :vector_cosine_ops, using: :hnsw
     t.index ["external_photo_id", "import_id"], name: "index_uploads_on_external_photo_id_and_import_id"
     t.index ["gallery_id"], name: "index_uploads_on_gallery_id"
     t.index ["import_metadata"], name: "index_uploads_on_import_metadata", using: :gin
@@ -276,6 +304,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_keys", "users"
   add_foreign_key "external_connections", "users"
   add_foreign_key "galleries", "users"
   add_foreign_key "imports", "external_connections"
