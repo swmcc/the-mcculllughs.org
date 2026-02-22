@@ -57,6 +57,25 @@ Rails.application.routes.draw do
     resources :uploads
   end
 
+  # API namespace
+  namespace :api do
+    namespace :v1 do
+      namespace :admin do
+        get "stats", to: "stats#show"
+
+        resources :photos, only: [ :index, :show ] do
+          member do
+            get :download
+            post :analysis
+            post :analysis_failed
+          end
+        end
+
+        post "similarity/search", to: "similarity#search"
+      end
+    end
+  end
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
