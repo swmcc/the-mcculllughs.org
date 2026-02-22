@@ -25,8 +25,14 @@ class Upload < ApplicationRecord
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }
-  scope :images, -> { where("uploads.file_content_type LIKE ?", "image/%") }
-  scope :videos, -> { where("uploads.file_content_type LIKE ?", "video/%") }
+  scope :images, -> {
+    joins(:file_attachment).joins("INNER JOIN active_storage_blobs ON active_storage_blobs.id = active_storage_attachments.blob_id")
+      .where("active_storage_blobs.content_type LIKE ?", "image/%")
+  }
+  scope :videos, -> {
+    joins(:file_attachment).joins("INNER JOIN active_storage_blobs ON active_storage_blobs.id = active_storage_attachments.blob_id")
+      .where("active_storage_blobs.content_type LIKE ?", "video/%")
+  }
   scope :publicly_visible, -> { where(is_public: true) }
   scope :from_import, -> { where.not(import_id: nil) }
 

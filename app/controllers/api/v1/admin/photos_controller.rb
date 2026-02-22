@@ -79,7 +79,7 @@ module Api
           json = {
             id: upload.id,
             filename: upload.file.filename.to_s,
-            content_type: upload.file_content_type,
+            content_type: upload.file.content_type,
             created_at: upload.created_at.iso8601,
             gallery_id: upload.gallery_id,
             gallery_title: upload.gallery.title,

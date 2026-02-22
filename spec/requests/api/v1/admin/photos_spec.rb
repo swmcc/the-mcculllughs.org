@@ -59,7 +59,7 @@ RSpec.describe "Api::V1::Admin::Photos", type: :request do
   end
 
   describe "GET /api/v1/admin/photos/:id" do
-    let(:upload) { create(:upload, gallery: gallery, user: admin, ) }
+    let(:upload) { create(:upload, gallery: gallery, user: admin) }
 
     it "returns photo details" do
       get "/api/v1/admin/photos/#{upload.id}", headers: headers
@@ -77,7 +77,7 @@ RSpec.describe "Api::V1::Admin::Photos", type: :request do
   end
 
   describe "GET /api/v1/admin/photos/:id/download" do
-    let(:upload) { create(:upload, gallery: gallery, user: admin, ) }
+    let(:upload) { create(:upload, gallery: gallery, user: admin) }
 
     it "redirects to file" do
       get "/api/v1/admin/photos/#{upload.id}/download", headers: headers
@@ -87,7 +87,7 @@ RSpec.describe "Api::V1::Admin::Photos", type: :request do
   end
 
   describe "POST /api/v1/admin/photos/:id/analysis" do
-    let(:upload) { create(:upload, gallery: gallery, user: admin, ) }
+    let(:upload) { create(:upload, gallery: gallery, user: admin) }
     let(:analysis_data) do
       {
         description: "A family photo",
@@ -112,7 +112,7 @@ RSpec.describe "Api::V1::Admin::Photos", type: :request do
   end
 
   describe "POST /api/v1/admin/photos/:id/analysis_failed" do
-    let(:upload) { create(:upload, gallery: gallery, user: admin, ) }
+    let(:upload) { create(:upload, gallery: gallery, user: admin) }
 
     it "marks analysis as failed" do
       post "/api/v1/admin/photos/#{upload.id}/analysis_failed",
