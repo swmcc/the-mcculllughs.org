@@ -10,9 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_22_182333) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "vector"
+
+# Could not dump table "_vector_smoketest" because of following StandardError
+#   Unknown type 'vector(3)' for column 'embedding'
+
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -42,6 +47,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "api_keys", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.string "key", null: false
+    t.datetime "last_used_at"
+    t.string "name", null: false
+    t.datetime "revoked_at"
+    t.string "scope", default: "admin", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["key"], name: "index_api_keys_on_key", unique: true
+    t.index ["user_id"], name: "index_api_keys_on_user_id"
+  end
+
   create_table "external_connections", force: :cascade do |t|
     t.string "access_secret"
     t.string "access_token"
@@ -61,11 +80,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
   end
 
   create_table "galleries", force: :cascade do |t|
+    t.bigint "cover_upload_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "title"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["cover_upload_id"], name: "index_galleries_on_cover_upload_id"
     t.index ["user_id"], name: "index_galleries_on_user_id"
   end
 
@@ -238,25 +259,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
-  create_table "uploads", force: :cascade do |t|
-    t.text "caption"
-    t.datetime "created_at", null: false
-    t.date "date_taken"
-    t.string "external_photo_id"
-    t.bigint "gallery_id", null: false
-    t.bigint "import_id"
-    t.jsonb "import_metadata", default: {}
-    t.boolean "is_public", default: false, null: false
-    t.string "short_code", null: false
-    t.string "title"
-    t.datetime "updated_at", null: false
-    t.bigint "user_id", null: false
-    t.index ["external_photo_id", "import_id"], name: "index_uploads_on_external_photo_id_and_import_id"
-    t.index ["gallery_id"], name: "index_uploads_on_gallery_id"
-    t.index ["import_metadata"], name: "index_uploads_on_import_metadata", using: :gin
-    t.index ["short_code"], name: "index_uploads_on_short_code", unique: true
-    t.index ["user_id"], name: "index_uploads_on_user_id"
-  end
+# Could not dump table "uploads" because of following StandardError
+#   Unknown type 'vector(768)' for column 'embedding'
+
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -276,7 +281,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_095843) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "api_keys", "users"
   add_foreign_key "external_connections", "users"
+  add_foreign_key "galleries", "uploads", column: "cover_upload_id"
   add_foreign_key "galleries", "users"
   add_foreign_key "imports", "external_connections"
   add_foreign_key "imports", "galleries"

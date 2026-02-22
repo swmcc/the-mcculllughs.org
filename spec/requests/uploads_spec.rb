@@ -112,4 +112,34 @@ RSpec.describe "Uploads", type: :request do
       end
     end
   end
+
+  describe "PATCH /uploads/:id/set_cover" do
+    it "sets the upload as gallery cover" do
+      upload = create(:upload, user: user, gallery: gallery)
+
+      patch "/uploads/#{upload.id}/set_cover"
+
+      expect(response).to have_http_status(:redirect)
+      expect(gallery.reload.cover_upload).to eq(upload)
+    end
+
+    it "replaces the previous cover photo" do
+      old_cover = create(:upload, user: user, gallery: gallery)
+      new_cover = create(:upload, user: user, gallery: gallery)
+      gallery.update!(cover_upload: old_cover)
+
+      patch "/uploads/#{new_cover.id}/set_cover"
+
+      expect(gallery.reload.cover_upload).to eq(new_cover)
+    end
+
+    it "responds with turbo_stream when requested" do
+      upload = create(:upload, user: user, gallery: gallery)
+
+      patch "/uploads/#{upload.id}/set_cover", as: :turbo_stream
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("text/vnd.turbo-stream.html")
+    end
+  end
 end

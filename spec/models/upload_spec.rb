@@ -4,6 +4,7 @@ RSpec.describe Upload, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:user) }
     it { is_expected.to belong_to(:gallery) }
+    it { is_expected.to have_one(:gallery_as_cover).class_name("Gallery").with_foreign_key("cover_upload_id").dependent(:nullify) }
     it { is_expected.to have_one_attached(:file) }
     it { is_expected.to have_one_attached(:thumbnail) }
   end
@@ -94,6 +95,48 @@ RSpec.describe Upload, type: :model do
       upload = create(:upload, user: user, gallery: gallery, is_public: true)
 
       expect(upload.is_public).to be true
+    end
+  end
+
+  describe "#cover?" do
+    it "returns true when upload is the gallery cover" do
+      gallery = create(:gallery)
+      upload = create(:upload, gallery: gallery)
+      gallery.update!(cover_upload: upload)
+
+      expect(upload.cover?).to be true
+    end
+
+    it "returns false when upload is not the gallery cover" do
+      gallery = create(:gallery)
+      upload = create(:upload, gallery: gallery)
+
+      expect(upload.cover?).to be false
+    end
+  end
+
+  describe "clearing cover on destroy" do
+    it "clears cover_upload_id when cover photo is deleted" do
+      gallery = create(:gallery)
+      upload = create(:upload, gallery: gallery)
+      gallery.update!(cover_upload: upload)
+
+      expect(gallery.reload.cover_upload_id).to eq(upload.id)
+
+      upload.destroy
+
+      expect(gallery.reload.cover_upload_id).to be_nil
+    end
+
+    it "does not affect gallery when non-cover photo is deleted" do
+      gallery = create(:gallery)
+      cover = create(:upload, gallery: gallery)
+      other = create(:upload, gallery: gallery)
+      gallery.update!(cover_upload: cover)
+
+      other.destroy
+
+      expect(gallery.reload.cover_upload_id).to eq(cover.id)
     end
   end
 end

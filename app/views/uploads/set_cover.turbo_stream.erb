@@ -1,0 +1,18 @@
+<%# Update the newly selected cover photo button to show highlighted state %>
+<%= turbo_stream.replace "cover_button_#{@upload.id}" do %>
+  <%= render partial: "galleries/cover_button", locals: { upload: @upload } %>
+<% end %>
+
+<%# Update the previous cover photo button to show unhighlighted state %>
+<% if @previous_cover.present? && @previous_cover.id != @upload.id %>
+  <%= turbo_stream.replace "cover_button_#{@previous_cover.id}" do %>
+    <%= render partial: "galleries/cover_button", locals: { upload: @previous_cover } %>
+  <% end %>
+<% end %>
+
+<%# Show toast notification %>
+<%= turbo_stream.prepend "flash_messages" do %>
+  <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4" data-controller="notification" data-notification-timeout-value="3000">
+    Cover photo updated
+  </div>
+<% end %>

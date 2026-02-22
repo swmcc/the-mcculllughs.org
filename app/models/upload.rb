@@ -2,6 +2,7 @@ class Upload < ApplicationRecord
   belongs_to :user
   belongs_to :gallery
   belongs_to :import, optional: true
+  has_one :gallery_as_cover, class_name: "Gallery", foreign_key: "cover_upload_id", dependent: :nullify
 
   # Active Storage attachments
   has_one_attached :file
@@ -10,6 +11,7 @@ class Upload < ApplicationRecord
   # Callbacks
   before_validation :generate_short_code, on: :create
   after_commit :process_media, on: :create
+  before_destroy :clear_as_cover
 
   # Validations
   validates :file, presence: true
@@ -27,6 +29,11 @@ class Upload < ApplicationRecord
   # Import helpers
   def imported?
     external_photo_id.present?
+  end
+
+  # Cover photo helper
+  def cover?
+    gallery.cover_upload_id == id
   end
 
   # Public URL helper
@@ -47,5 +54,9 @@ class Upload < ApplicationRecord
 
   def process_media
     ProcessMediaJob.perform_later(id) if file.attached?
+  end
+
+  def clear_as_cover
+    gallery.update(cover_upload_id: nil) if cover?
   end
 end
