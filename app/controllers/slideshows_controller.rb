@@ -1,4 +1,6 @@
 class SlideshowsController < ApplicationController
+  include UploadsHelper
+
   before_action :authenticate_user!
 
   def index
@@ -74,22 +76,5 @@ class SlideshowsController < ApplicationController
 
   def slideshow_params
     params.require(:slideshow).permit(:title, :description, :interval, :audio)
-  end
-
-  def upload_variant_url(upload, variant)
-    return "" unless upload.file.attached?
-
-    case variant
-    when :thumb
-      url_for(upload.file.variant(resize_to_fill: [ 300, 300 ]))
-    when :medium
-      url_for(upload.file.variant(resize_to_limit: [ 800, 800 ]))
-    when :large
-      url_for(upload.file.variant(resize_to_limit: [ 1600, 1600 ]))
-    else
-      url_for(upload.file)
-    end
-  rescue
-    ""
   end
 end
