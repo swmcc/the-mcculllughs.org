@@ -12,7 +12,10 @@
       original: url_for(u.file),
       thumb: upload_variant_url(u, :thumb),
       medium: upload_variant_url(u, :medium),
-      large: upload_variant_url(u, :large)
+      large: upload_variant_url(u, :large),
+      thumb_webp: upload_variant_url(u, :thumb, format: :webp),
+      medium_webp: upload_variant_url(u, :medium, format: :webp),
+      large_webp: upload_variant_url(u, :large, format: :webp)
     }
   end
 %>
@@ -89,7 +92,7 @@
       <% @uploads.each_with_index do |upload, index| %>
         <div id="<%= dom_id(upload) %>" class="group relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
           <a href="#" data-action="click->lightbox#open" data-index="<%= index %>" class="block w-full h-full">
-            <%= image_tag upload_variant_url(upload, :thumb),
+            <%= upload_picture_tag upload, :thumb,
                 class: "w-full h-full object-cover cursor-pointer",
                 loading: "lazy",
                 alt: upload.title,

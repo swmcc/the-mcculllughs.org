@@ -11,7 +11,10 @@
       original: url_for(u.file),
       thumb: upload_variant_url(u, :thumb),
       medium: upload_variant_url(u, :medium),
-      large: upload_variant_url(u, :large)
+      large: upload_variant_url(u, :large),
+      thumb_webp: upload_variant_url(u, :thumb, format: :webp),
+      medium_webp: upload_variant_url(u, :medium, format: :webp),
+      large_webp: upload_variant_url(u, :large, format: :webp)
     }
   end
 %>
@@ -59,7 +62,7 @@
         <% next unless upload.file.attached? %>
         <a href="#" data-action="click->search-lightbox#open" data-index="<%= index %>" class="group block">
           <div class="relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
-            <%= image_tag upload_variant_url(upload, :thumb),
+            <%= upload_picture_tag upload, :thumb,
                 class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
                 loading: "lazy",
                 alt: upload.title %>

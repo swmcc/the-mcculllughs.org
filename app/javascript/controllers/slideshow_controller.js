@@ -19,6 +19,22 @@ export default class extends Controller {
     this.timer = null
     this.lastTransition = null
     this.audioPlaying = false
+    this.supportsWebP = this.checkWebPSupport()
+  }
+
+  checkWebPSupport() {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
+  }
+
+  getImageSrc(img) {
+    // Prefer WebP if browser supports it
+    if (this.supportsWebP && img.large_webp) {
+      return img.large_webp
+    }
+    return img.large || img.medium || img.original
   }
 
   // Called when user clicks "Start Slideshow" on saved slideshow title screen
@@ -200,7 +216,7 @@ export default class extends Controller {
     // Coming from title slide - just fade in the first image
     if (wasOnTitleSlide) {
       this.imageTarget.style.opacity = "0"
-      this.imageTarget.src = img.large || img.medium || img.original
+      this.imageTarget.src = this.getImageSrc(img)
       this.imageTarget.onload = () => {
         this.imageTarget.style.transition = "opacity 0.5s ease"
         this.imageTarget.style.opacity = "1"
@@ -213,10 +229,10 @@ export default class extends Controller {
 
     if (withTransition) {
       this.applyTransition(() => {
-        this.imageTarget.src = img.large || img.medium || img.original
+        this.imageTarget.src = this.getImageSrc(img)
       })
     } else {
-      this.imageTarget.src = img.large || img.medium || img.original
+      this.imageTarget.src = this.getImageSrc(img)
     }
   }
 

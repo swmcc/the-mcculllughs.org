@@ -31,7 +31,10 @@ class SlideshowsController < ApplicationController
         original: url_for(u.file),
         thumb: upload_variant_url(u, :thumb),
         medium: upload_variant_url(u, :medium),
-        large: upload_variant_url(u, :large)
+        large: upload_variant_url(u, :large),
+        thumb_webp: upload_variant_url(u, :thumb, format: :webp),
+        medium_webp: upload_variant_url(u, :medium, format: :webp),
+        large_webp: upload_variant_url(u, :large, format: :webp)
       }
     end
   end

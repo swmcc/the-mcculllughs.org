@@ -9,7 +9,7 @@
         <div class="bg-white rounded-xl border border-neutral-200 shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
           <% if slideshow.uploads.any? %>
             <div class="aspect-video bg-neutral-100 overflow-hidden">
-              <%= image_tag upload_variant_url(slideshow.uploads.first, :thumb),
+              <%= upload_picture_tag slideshow.uploads.first, :thumb,
                   class: "w-full h-full object-cover",
                   loading: "lazy" %>
             </div>

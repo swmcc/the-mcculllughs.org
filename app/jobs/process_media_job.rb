@@ -10,6 +10,9 @@ class ProcessMediaJob < ApplicationJob
     large: { resize_to_limit: [ 2048, 2048 ] }
   }.freeze
 
+  # WebP versions of each variant for modern browsers
+  WEBP_VARIANTS = VARIANTS.transform_values { |opts| opts.merge(format: :webp, saver: { quality: 80 }) }.freeze
+
   def perform(upload_id)
     upload = Upload.find_by(id: upload_id)
     return unless upload&.file&.attached?
@@ -24,12 +27,20 @@ class ProcessMediaJob < ApplicationJob
   private
 
   def generate_variants(upload)
+    # Generate original format variants
     VARIANTS.each do |name, options|
-      # This triggers variant generation and stores it
       upload.file.variant(options).processed
       Rails.logger.info "Generated #{name} variant for upload #{upload.id}"
     rescue StandardError => e
       Rails.logger.error "Failed to generate #{name} variant for upload #{upload.id}: #{e.message}"
+    end
+
+    # Generate WebP variants for modern browsers
+    WEBP_VARIANTS.each do |name, options|
+      upload.file.variant(options).processed
+      Rails.logger.info "Generated #{name} WebP variant for upload #{upload.id}"
+    rescue StandardError => e
+      Rails.logger.error "Failed to generate #{name} WebP variant for upload #{upload.id}: #{e.message}"
     end
   end
 

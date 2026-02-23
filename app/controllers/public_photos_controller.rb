@@ -7,7 +7,14 @@ class PublicPhotosController < ApplicationController
   def thumbnail
     raise ActiveRecord::RecordNotFound unless @upload.is_public?
 
-    redirect_to rails_blob_url(@upload.file), allow_other_host: true
+    # Use WebP variant if browser supports it, otherwise use standard thumb
+    variant_options = if request.accepts.any? { |t| t.to_s.include?("webp") }
+      ProcessMediaJob::WEBP_VARIANTS[:thumb]
+    else
+      ProcessMediaJob::VARIANTS[:thumb]
+    end
+
+    redirect_to rails_representation_url(@upload.file.variant(variant_options)), allow_other_host: true
   end
 
   # GET /p/:short_code - full photo page
