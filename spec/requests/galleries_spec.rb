@@ -48,7 +48,7 @@ RSpec.describe "Galleries", type: :request do
       post "/galleries",
         params: { gallery: { title: "", description: "Test" } },
         headers: { "Accept" => "text/vnd.turbo-stream.html, text/html" }
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 

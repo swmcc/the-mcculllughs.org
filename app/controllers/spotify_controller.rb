@@ -20,7 +20,7 @@ class SpotifyController < ApplicationController
     result = service.search(query, type: type)
 
     if result[:error]
-      render json: { error: result[:error] }, status: :unprocessable_entity
+      render json: { error: result[:error] }, status: :unprocessable_content
     else
       render json: result
     end

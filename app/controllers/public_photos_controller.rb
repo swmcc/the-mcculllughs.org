@@ -33,7 +33,7 @@ class PublicPhotosController < ApplicationController
     if @upload.update(upload_params)
       render json: { success: true, is_public: @upload.is_public }
     else
-      render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_entity
+      render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_content
     end
   end
 
