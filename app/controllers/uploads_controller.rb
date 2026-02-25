@@ -37,8 +37,8 @@ class UploadsController < ApplicationController
         format.json { render json: { success: true, message: message }, status: :ok }
       else
         format.html { redirect_to @gallery, alert: "Failed to upload files: #{errors.join(', ')}" }
-        format.turbo_stream { head :unprocessable_entity }
-        format.json { render json: { success: false, errors: errors }, status: :unprocessable_entity }
+        format.turbo_stream { head :unprocessable_content }
+        format.json { render json: { success: false, errors: errors }, status: :unprocessable_content }
       end
     end
   end
@@ -54,7 +54,7 @@ class UploadsController < ApplicationController
         short_code: @upload.short_code
       }
     else
-      render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_entity
+      render json: { success: false, errors: @upload.errors.full_messages }, status: :unprocessable_content
     end
   end
 

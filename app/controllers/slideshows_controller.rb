@@ -52,7 +52,7 @@ class SlideshowsController < ApplicationController
     if @slideshow.save
       render json: { id: @slideshow.id, redirect: slideshow_path(@slideshow) }
     else
-      render json: { errors: @slideshow.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @slideshow.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -65,7 +65,7 @@ class SlideshowsController < ApplicationController
     if @slideshow.update(slideshow_params)
       redirect_to slideshow_path(@slideshow), notice: "Slideshow updated"
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

@@ -15,7 +15,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
         bypass_sign_in resource, scope: resource_name
         redirect_to edit_user_registration_path, notice: "Settings updated successfully."
       else
-        render :edit, status: :unprocessable_entity
+        render :edit, status: :unprocessable_content
       end
     else
       # Changing password requires current password
