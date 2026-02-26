@@ -1,0 +1,14 @@
+---
+# Brakeman configuration
+# https://brakemanscanner.org/docs/options/
+
+# Suppress version mismatch warnings
+:ensure_latest: false
+
+# Output settings
+:output_format: :text
+:quiet: false
+
+# Don't exit with error code on warnings (CI should still check warnings)
+# Uncomment if you want Brakeman to always exit 0:
+# :exit_on_warn: false
