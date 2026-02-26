@@ -3,11 +3,11 @@ class GalleriesController < ApplicationController
   before_action :authorize_gallery!, only: [ :edit, :update, :destroy ]
 
   def index
-    @galleries = Gallery.includes(:user).recent
+    @galleries = Gallery.includes(:user, cover_upload: { file_attachment: :blob }).recent
   end
 
   def show
-    @uploads = @gallery.uploads.recent
+    @uploads = @gallery.uploads.includes(file_attachment: :blob).recent
     @upload = @gallery.uploads.build
   end
 

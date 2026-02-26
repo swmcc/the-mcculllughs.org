@@ -27,8 +27,8 @@ RSpec.describe User, type: :model do
 
   describe "devise" do
     it "is database authenticatable" do
-      user = create(:user, password: "password123")
-      expect(user.valid_password?("password123")).to be true
+      user = create(:user, password: "password12345")
+      expect(user.valid_password?("password12345")).to be true
     end
   end
 end
