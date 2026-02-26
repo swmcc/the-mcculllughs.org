@@ -136,13 +136,13 @@ RSpec.describe "Authorization Security", type: :request do
 
     describe "setting cover photo" do
       it "prevents setting cover on other users' galleries" do
-        post "/uploads/#{other_upload.id}/set_cover"
+        patch "/uploads/#{other_upload.id}/set_cover"
         expect(response).to redirect_to(galleries_path)
         expect(other_gallery.reload.cover_upload_id).not_to eq(other_upload.id)
       end
 
       it "allows setting cover on own galleries" do
-        post "/uploads/#{user_upload.id}/set_cover"
+        patch "/uploads/#{user_upload.id}/set_cover"
         expect(response).to redirect_to(user_gallery)
         expect(user_gallery.reload.cover_upload_id).to eq(user_upload.id)
       end

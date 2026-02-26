@@ -8,7 +8,16 @@ class HomeController < ApplicationController
       @public_photos = Upload.publicly_visible
                              .includes(file_attachment: :blob)
                              .order("RANDOM()")
-                             .limit(200)
+                             .limit(100)
+
+      # Pre-generate thumbnail URLs to avoid N controller redirects
+      @photo_data = @public_photos.map do |photo|
+        {
+          short_code: photo.short_code,
+          thumb_url: url_for(photo.file.variant(ProcessMediaJob::WEBP_VARIANTS[:thumb]))
+        }
+      end
+
       render layout: "landing"
     end
   end
