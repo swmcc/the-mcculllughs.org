@@ -1,6 +1,6 @@
 <%
   # Split photos into rows for animation
-  photos = @public_photos.to_a
+  photos = @photo_data
   row_size = [(photos.size / 4.0).ceil, 1].max
   rows = photos.any? ? photos.each_slice(row_size).to_a : []
 %>
@@ -23,10 +23,10 @@
       <div class="photo-row photo-row-<%= direction %> flex gap-2">
         <% 2.times do %>
           <% row_photos.each do |photo| %>
-            <%= link_to public_photo_path(photo.short_code), class: "flex-shrink-0 block overflow-hidden rounded-lg hover:scale-105 transition-transform duration-300" do %>
-              <%= image_tag public_thumbnail_path(photo.short_code),
+            <%= link_to public_photo_path(photo[:short_code]), class: "flex-shrink-0 block overflow-hidden rounded-lg hover:scale-105 transition-transform duration-300" do %>
+              <%= image_tag photo[:thumb_url],
                   class: "w-20 h-20 sm:w-24 sm:h-24 object-cover",
-                  loading: "eager",
+                  loading: "lazy",
                   decoding: "async" %>
             <% end %>
           <% end %>
