@@ -12,11 +12,16 @@ module UploadsHelper
   end
 
   # Renders a <picture> element with WebP source and fallback
-  def upload_picture_tag(upload, size, **html_options)
+  # Includes lazy loading and async decoding by default for performance
+  def upload_picture_tag(upload, size, lazy: true, **html_options)
     return nil unless upload.file.attached?
 
     webp_url = upload_variant_url(upload, size, format: :webp)
     fallback_url = upload_variant_url(upload, size)
+
+    # Add performance attributes by default
+    html_options[:loading] ||= "lazy" if lazy
+    html_options[:decoding] ||= "async"
 
     content_tag(:picture) do
       safe_join([
