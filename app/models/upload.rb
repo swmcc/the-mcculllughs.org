@@ -13,11 +13,20 @@ class Upload < ApplicationRecord
   after_commit :process_media, on: :create
   before_destroy :clear_as_cover
 
+  # Allowed content types for uploads
+  ALLOWED_CONTENT_TYPES = %w[
+    image/png image/jpg image/jpeg image/gif image/webp image/heic image/heif
+    video/mp4 video/quicktime video/x-msvideo video/webm
+  ].freeze
+
+  MAX_FILE_SIZE = 500.megabytes
+
   # Validations
   validates :file, presence: true
   validates :user, presence: true
   validates :gallery, presence: true
   validates :short_code, presence: true, uniqueness: true
+  validate :acceptable_file
 
   # Scopes
   scope :recent, -> { order(created_at: :desc) }
@@ -58,5 +67,17 @@ class Upload < ApplicationRecord
 
   def clear_as_cover
     gallery.update(cover_upload_id: nil) if cover?
+  end
+
+  def acceptable_file
+    return unless file.attached?
+
+    unless file.blob.content_type.in?(ALLOWED_CONTENT_TYPES)
+      errors.add(:file, "must be an image or video (#{ALLOWED_CONTENT_TYPES.join(', ')})")
+    end
+
+    if file.blob.byte_size > MAX_FILE_SIZE
+      errors.add(:file, "is too large (maximum is #{MAX_FILE_SIZE / 1.megabyte}MB)")
+    end
   end
 end

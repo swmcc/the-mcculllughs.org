@@ -1,7 +1,8 @@
 class UploadsController < ApplicationController
   before_action :set_gallery, only: [ :create ]
   before_action :set_upload, only: [ :update, :destroy, :set_cover ]
-  before_action :authorize_edit!, only: [ :update ]
+  before_action :authorize_gallery!, only: [ :create ]
+  before_action :authorize_upload!, only: [ :update, :destroy, :set_cover ]
 
   def create
     # Handle multiple file uploads
@@ -83,9 +84,23 @@ class UploadsController < ApplicationController
 
   private
 
-  def authorize_edit!
+  def authorize_upload!
     unless current_user&.admin? || @upload.gallery.user == current_user
-      render json: { error: "Not authorized" }, status: :forbidden
+      respond_to do |format|
+        format.html { redirect_to galleries_path, alert: "Not authorized" }
+        format.json { render json: { error: "Not authorized" }, status: :forbidden }
+        format.turbo_stream { head :forbidden }
+      end
+    end
+  end
+
+  def authorize_gallery!
+    unless current_user&.admin? || @gallery.user == current_user
+      respond_to do |format|
+        format.html { redirect_to galleries_path, alert: "Not authorized" }
+        format.json { render json: { error: "Not authorized" }, status: :forbidden }
+        format.turbo_stream { head :forbidden }
+      end
     end
   end
 
