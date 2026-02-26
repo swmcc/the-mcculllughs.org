@@ -24,6 +24,12 @@ Rails.application.configure do
   # Store uploaded files on S3 (see config/storage.yml for options).
   config.active_storage.service = :amazon
 
+  # Use CDN for faster image delivery (set CDN_HOST env var to your CloudFront/CDN URL)
+  if ENV["CDN_HOST"].present?
+    config.active_storage.resolve_model_to_route = :cdn_proxy
+    config.active_storage.cdn_host = ENV["CDN_HOST"]
+  end
+
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 
