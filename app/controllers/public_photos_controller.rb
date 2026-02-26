@@ -14,7 +14,10 @@ class PublicPhotosController < ApplicationController
       ProcessMediaJob::VARIANTS[:thumb]
     end
 
-    redirect_to rails_representation_url(@upload.file.variant(variant_options)), allow_other_host: true
+    # Cache the redirect for 1 year (thumbnail URLs are immutable)
+    expires_in 1.year, public: true
+
+    redirect_to rails_representation_url(@upload.file.variant(variant_options).processed), allow_other_host: true
   end
 
   # GET /p/:short_code - full photo page
