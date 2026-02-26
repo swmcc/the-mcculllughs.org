@@ -1,5 +1,6 @@
 class GalleriesController < ApplicationController
   before_action :set_gallery, only: [ :show, :edit, :update, :destroy ]
+  before_action :authorize_gallery!, only: [ :edit, :update, :destroy ]
 
   def index
     @galleries = Gallery.includes(:user).recent
@@ -44,6 +45,12 @@ class GalleriesController < ApplicationController
 
   def set_gallery
     @gallery = Gallery.find(params[:id])
+  end
+
+  def authorize_gallery!
+    unless current_user&.admin? || @gallery.user == current_user
+      redirect_to galleries_path, alert: "Not authorized"
+    end
   end
 
   def gallery_params

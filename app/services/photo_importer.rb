@@ -60,13 +60,34 @@ class PhotoImporter
     )
   end
 
+  ALLOWED_EXTENSIONS = %w[jpg jpeg png gif webp heic heif mp4 mov avi webm].freeze
+  EXTENSION_TO_CONTENT_TYPE = {
+    "jpg" => "image/jpeg",
+    "jpeg" => "image/jpeg",
+    "png" => "image/png",
+    "gif" => "image/gif",
+    "webp" => "image/webp",
+    "heic" => "image/heic",
+    "heif" => "image/heif",
+    "mp4" => "video/mp4",
+    "mov" => "video/quicktime",
+    "avi" => "video/x-msvideo",
+    "webm" => "video/webm"
+  }.freeze
+
   def generate_filename
-    ext = photo_data["originalformat"] || "jpg"
-    "#{import.provider}_#{photo_data['id']}.#{ext}"
+    raw_ext = photo_data["originalformat"].to_s.downcase.gsub(/[^a-z0-9]/, "")
+    ext = ALLOWED_EXTENSIONS.include?(raw_ext) ? raw_ext : "jpg"
+
+    # Sanitize the photo ID to prevent path traversal
+    safe_id = photo_data["id"].to_s.gsub(/[^a-zA-Z0-9_-]/, "")
+    safe_provider = import.provider.to_s.gsub(/[^a-zA-Z0-9_-]/, "")
+
+    "#{safe_provider}_#{safe_id}.#{ext}"
   end
 
   def detect_content_type(file)
-    # Default to JPEG for photos
-    "image/jpeg"
+    raw_ext = photo_data["originalformat"].to_s.downcase.gsub(/[^a-z0-9]/, "")
+    EXTENSION_TO_CONTENT_TYPE[raw_ext] || "image/jpeg"
   end
 end

@@ -25,6 +25,56 @@ RSpec.describe Upload, type: :model do
         expect(upload.errors[:short_code]).to include("can't be blank")
       end
     end
+
+    describe "file content type validation" do
+      let(:user) { create(:user) }
+      let(:gallery) { create(:gallery, user: user) }
+
+      it "accepts valid image content types" do
+        %w[image/jpeg image/png image/gif image/webp].each do |content_type|
+          upload = build(:upload, user: user, gallery: gallery)
+          upload.file.attach(
+            io: StringIO.new("fake image data"),
+            filename: "test.jpg",
+            content_type: content_type
+          )
+          expect(upload).to be_valid
+        end
+      end
+
+      it "accepts valid video content types" do
+        %w[video/mp4 video/quicktime].each do |content_type|
+          upload = build(:upload, user: user, gallery: gallery)
+          upload.file.attach(
+            io: StringIO.new("fake video data"),
+            filename: "test.mp4",
+            content_type: content_type
+          )
+          expect(upload).to be_valid
+        end
+      end
+
+      it "rejects invalid content types" do
+        upload = build(:upload, user: user, gallery: gallery)
+        upload.file.attach(
+          io: StringIO.new("<?php echo 'hacked'; ?>"),
+          filename: "shell.php",
+          content_type: "application/x-php"
+        )
+        expect(upload).not_to be_valid
+        expect(upload.errors[:file]).to include(/must be an image or video/)
+      end
+
+      it "rejects executable files" do
+        upload = build(:upload, user: user, gallery: gallery)
+        upload.file.attach(
+          io: StringIO.new("MZ..."),
+          filename: "malware.exe",
+          content_type: "application/x-msdownload"
+        )
+        expect(upload).not_to be_valid
+      end
+    end
   end
 
   describe "scopes" do

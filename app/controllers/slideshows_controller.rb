@@ -42,9 +42,19 @@ class SlideshowsController < ApplicationController
   def create
     @slideshow = current_user.slideshows.build(slideshow_params)
 
-    # Add uploads from params
+    # Add uploads from params - only allow uploads owned by current user or from their galleries
     if params[:upload_ids].present?
-      params[:upload_ids].each_with_index do |upload_id, index|
+      # Get valid upload IDs that belong to current user's galleries
+      valid_upload_ids = if current_user.admin?
+        Upload.where(id: params[:upload_ids]).pluck(:id)
+      else
+        Upload.joins(:gallery)
+              .where(id: params[:upload_ids])
+              .where(galleries: { user_id: current_user.id })
+              .pluck(:id)
+      end
+
+      valid_upload_ids.each_with_index do |upload_id, index|
         @slideshow.slideshow_uploads.build(upload_id: upload_id, position: index)
       end
     end
