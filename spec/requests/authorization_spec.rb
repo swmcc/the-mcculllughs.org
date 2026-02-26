@@ -159,7 +159,7 @@ RSpec.describe "Authorization Security", type: :request do
       it "prevents adding other users' uploads to slideshows" do
         post "/slideshows", params: {
           slideshow: { title: "Test Slideshow" },
-          upload_ids: [other_upload.id]
+          upload_ids: [ other_upload.id ]
         }, as: :json
 
         expect(response).to have_http_status(:success)
@@ -170,7 +170,7 @@ RSpec.describe "Authorization Security", type: :request do
       it "allows adding own uploads to slideshows" do
         post "/slideshows", params: {
           slideshow: { title: "Test Slideshow" },
-          upload_ids: [user_upload.id]
+          upload_ids: [ user_upload.id ]
         }, as: :json
 
         expect(response).to have_http_status(:success)
@@ -181,7 +181,7 @@ RSpec.describe "Authorization Security", type: :request do
       it "filters out unauthorized uploads but keeps authorized ones" do
         post "/slideshows", params: {
           slideshow: { title: "Test Slideshow" },
-          upload_ids: [user_upload.id, other_upload.id]
+          upload_ids: [ user_upload.id, other_upload.id ]
         }, as: :json
 
         expect(response).to have_http_status(:success)
@@ -197,7 +197,7 @@ RSpec.describe "Authorization Security", type: :request do
       it "allows admins to add any uploads to slideshows" do
         post "/slideshows", params: {
           slideshow: { title: "Admin Slideshow" },
-          upload_ids: [other_upload.id]
+          upload_ids: [ other_upload.id ]
         }, as: :json
 
         expect(response).to have_http_status(:success)
