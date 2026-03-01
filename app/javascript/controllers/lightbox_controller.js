@@ -10,22 +10,13 @@ export default class extends Controller {
 
   connect() {
     this.saveTimeout = null
-    this.supportsWebP = this.checkWebPSupport()
     this.imageTarget.onerror = () => {
       const image = this.imagesValue[this.indexValue]
-      // Fallback to non-WebP version, then original
-      const fallback = image.large || image.original
-      if (this.imageTarget.src !== fallback) {
-        this.imageTarget.src = fallback
+      // Fallback to original if variant fails
+      if (this.imageTarget.src !== image.original) {
+        this.imageTarget.src = image.original
       }
     }
-  }
-
-  checkWebPSupport() {
-    const canvas = document.createElement('canvas')
-    canvas.width = 1
-    canvas.height = 1
-    return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
   }
 
   open(event) {
@@ -37,12 +28,8 @@ export default class extends Controller {
 
   show() {
     const image = this.imagesValue[this.indexValue]
-    // Prefer WebP if browser supports it
-    if (this.supportsWebP && image.large_webp) {
-      this.imageTarget.src = image.large_webp
-    } else {
-      this.imageTarget.src = image.large || image.original
-    }
+    // Use large variant (WebP), fallback to original
+    this.imageTarget.src = image.large || image.original
 
     // Update editable inputs
     if (this.canEditValue && this.hasTitleInputTarget) {

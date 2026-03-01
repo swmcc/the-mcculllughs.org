@@ -19,21 +19,10 @@ export default class extends Controller {
     this.timer = null
     this.lastTransition = null
     this.audioPlaying = false
-    this.supportsWebP = this.checkWebPSupport()
-  }
-
-  checkWebPSupport() {
-    const canvas = document.createElement('canvas')
-    canvas.width = 1
-    canvas.height = 1
-    return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
   }
 
   getImageSrc(img) {
-    // Prefer WebP if browser supports it
-    if (this.supportsWebP && img.large_webp) {
-      return img.large_webp
-    }
+    // Use large variant (WebP), fallback to original
     return img.large || img.medium || img.original
   }
 

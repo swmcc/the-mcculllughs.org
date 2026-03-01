@@ -6,14 +6,6 @@ export default class extends Controller {
 
   connect() {
     this.currentIndex = 0
-    this.supportsWebP = this.checkWebPSupport()
-  }
-
-  checkWebPSupport() {
-    const canvas = document.createElement('canvas')
-    canvas.width = 1
-    canvas.height = 1
-    return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0
   }
 
   open(event) {
@@ -70,12 +62,8 @@ export default class extends Controller {
     const img = this.imagesValue[this.currentIndex]
     if (!img) return
 
-    // Update image - prefer WebP if supported
-    if (this.supportsWebP && img.large_webp) {
-      this.imageTarget.src = img.large_webp
-    } else {
-      this.imageTarget.src = img.large || img.medium || img.original
-    }
+    // Use large variant (WebP), fallback to original
+    this.imageTarget.src = img.large || img.medium || img.original
 
     // Update counter
     this.counterTarget.textContent = `${this.currentIndex + 1} / ${this.imagesValue.length}`

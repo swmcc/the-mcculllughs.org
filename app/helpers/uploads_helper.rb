@@ -1,23 +1,22 @@
 # frozen_string_literal: true
 
 module UploadsHelper
-  def upload_variant_url(upload, size, format: nil)
+  def upload_variant_url(upload, size)
     return nil unless upload.file.attached?
 
-    variants = format == :webp ? ProcessMediaJob::WEBP_VARIANTS : ProcessMediaJob::VARIANTS
-    options = variants[size.to_sym]
+    options = ProcessMediaJob::VARIANTS[size.to_sym]
     return url_for(upload.file) unless options
 
     url_for(upload.file.variant(options))
   end
 
-  # Renders a <picture> element with WebP source and fallback
+  # Renders a <picture> element with WebP source and original fallback
   # Includes lazy loading and async decoding by default for performance
   def upload_picture_tag(upload, size, lazy: true, **html_options)
     return nil unless upload.file.attached?
 
-    webp_url = upload_variant_url(upload, size, format: :webp)
-    fallback_url = upload_variant_url(upload, size)
+    webp_url = upload_variant_url(upload, size)
+    fallback_url = url_for(upload.file)
 
     # Add performance attributes by default
     html_options[:loading] ||= "lazy" if lazy
@@ -43,10 +42,7 @@ module UploadsHelper
       original: url_for(upload.file),
       thumb: upload_variant_url(upload, :thumb),
       medium: upload_variant_url(upload, :medium),
-      large: upload_variant_url(upload, :large),
-      thumb_webp: upload_variant_url(upload, :thumb, format: :webp),
-      medium_webp: upload_variant_url(upload, :medium, format: :webp),
-      large_webp: upload_variant_url(upload, :large, format: :webp)
+      large: upload_variant_url(upload, :large)
     }
   end
 end

@@ -14,7 +14,7 @@ class HomeController < ApplicationController
       @photo_data = @public_photos.map do |photo|
         {
           short_code: photo.short_code,
-          thumb_url: url_for(photo.file.variant(ProcessMediaJob::WEBP_VARIANTS[:thumb]))
+          thumb_url: url_for(photo.file.variant(ProcessMediaJob::VARIANTS[:thumb]))
         }
       end
 
