@@ -21,13 +21,14 @@
 %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
-     data-controller="lightbox slideshow"
+     data-controller="lightbox slideshow photo-picker"
      data-lightbox-images-value="<%= images_data.to_json %>"
      data-lightbox-can-edit-value="<%= can_edit %>"
      data-slideshow-images-value="<%= images_data.to_json %>"
      data-slideshow-gallery-title-value="<%= @gallery.title %>"
      data-slideshow-gallery-description-value="<%= @gallery.description %>"
-     data-action="keydown@window->lightbox#keydown keydown@window->slideshow#keydown">
+     data-photo-picker-images-value="<%= images_data.to_json %>"
+     data-action="keydown@window->lightbox#keydown keydown@window->slideshow#keydown keydown@window->photo-picker#keydown">
 
   <div class="mb-6">
     <%= link_to galleries_path, class: "inline-flex items-center text-sm text-neutral-500 hover:text-neutral-800 transition-colors" do %>
@@ -71,6 +72,10 @@
               <button data-action="click->slideshow#openSaveModal click->dropdown#close" class="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 flex items-center gap-2">
                 <span>💾</span>
                 <span>Save</span>
+              </button>
+              <button data-action="click->photo-picker#open click->dropdown#close" class="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 flex items-center gap-2">
+                <span>➕</span>
+                <span>Add to...</span>
               </button>
             </div>
           </div>
@@ -413,6 +418,70 @@
       </div>
     </div>
   </div>
+
+  <!-- Photo Picker Modal -->
+  <div data-photo-picker-target="modal"
+       data-action="click->photo-picker#close"
+       class="hidden fixed inset-0 z-50 bg-black/95 flex flex-col">
+
+    <!-- Header -->
+    <div class="flex-shrink-0 p-4 flex items-center justify-between border-b border-white/10"
+         data-action="click->photo-picker#stopPropagation">
+      <button data-action="click->photo-picker#close"
+              class="p-2 text-white/70 hover:text-white transition-colors rounded-lg hover:bg-white/10">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <h2 class="text-white text-lg font-medium">Add to Slideshow</h2>
+      <div class="w-10"></div>
+    </div>
+
+    <!-- Search and Slideshow Strip -->
+    <div class="flex-1 flex flex-col justify-center p-4" data-action="click->photo-picker#stopPropagation">
+      <!-- Search -->
+      <div class="max-w-md mx-auto w-full mb-6">
+        <div class="relative">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          <input type="text"
+                 data-photo-picker-target="searchInput"
+                 data-action="input->photo-picker#handleSearch"
+                 placeholder="Search slideshows..."
+                 class="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:ring-1 focus:ring-white/40">
+        </div>
+      </div>
+
+      <!-- Slideshow Horizontal Strip -->
+      <div class="relative">
+        <div data-photo-picker-target="slideshowList"
+             class="flex gap-4 overflow-x-auto pb-4 px-4 scroll-smooth snap-x"
+             style="-webkit-overflow-scrolling: touch;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Zoom Preview (appears above filmstrip on hover) -->
+    <div data-photo-picker-target="zoomPreview"
+         class="hidden opacity-0 transition-opacity duration-150 absolute bottom-32 left-1/2 -translate-x-1/2 pointer-events-none z-10">
+    </div>
+
+    <!-- Filmstrip -->
+    <div class="flex-shrink-0 border-t border-white/10 p-4" data-action="click->photo-picker#stopPropagation">
+      <p data-photo-picker-target="selectedCount" class="text-white/60 text-sm text-center mb-3">
+        Tap photos to select
+      </p>
+      <div class="relative">
+        <div data-photo-picker-target="filmstrip"
+             class="flex gap-2 overflow-x-auto pb-2 px-2 scroll-smooth snap-x snap-mandatory"
+             style="-webkit-overflow-scrolling: touch;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -451,5 +520,40 @@
   @keyframes zoomIn {
     from { transform: scale(1.05); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Photo picker scrollable strips */
+  [data-photo-picker-target="filmstrip"],
+  [data-photo-picker-target="slideshowList"] {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) transparent;
+  }
+  [data-photo-picker-target="filmstrip"]::-webkit-scrollbar,
+  [data-photo-picker-target="slideshowList"]::-webkit-scrollbar {
+    height: 6px;
+  }
+  [data-photo-picker-target="filmstrip"]::-webkit-scrollbar-track,
+  [data-photo-picker-target="slideshowList"]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  [data-photo-picker-target="filmstrip"]::-webkit-scrollbar-thumb,
+  [data-photo-picker-target="slideshowList"]::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 3px;
+  }
+  [data-photo-picker-target="filmstrip"]::-webkit-scrollbar-thumb:hover,
+  [data-photo-picker-target="slideshowList"]::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+  }
+
+  /* Filmstrip item hover zoom */
+  .filmstrip-item:hover {
+    transform: scale(1.15);
+    z-index: 10;
+  }
+
+  /* Slideshow card styling */
+  .slideshow-card {
+    scroll-snap-align: start;
   }
 </style>
