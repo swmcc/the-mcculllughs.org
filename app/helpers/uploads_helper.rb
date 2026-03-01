@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module UploadsHelper
-  def upload_variant_url(upload, size)
+  def upload_variant_url(upload, size, **_options)
     return nil unless upload.file.attached?
 
     options = ProcessMediaJob::VARIANTS[size.to_sym]
