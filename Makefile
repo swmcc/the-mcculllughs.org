@@ -138,6 +138,41 @@ clean: ## Clean temporary files, logs, and cached assets
 # 💾 Backup & Restore
 # -----------------------------
 
+local.db.pull: ## Pull production database via SSH tunnel (requires Docker)
+	@echo "$(GREEN)==> Pulling production database...$(RESET)"
+	@bash -c 'set -a; source .env.production; set +a; \
+		echo "$(GREEN)==> Opening SSH tunnel to $$PROD_SSH_HOST...$(RESET)"; \
+		ssh -f -N -L 5433:$$PROD_DB_HOST:$$PROD_DB_PORT $$PROD_SSH_USER@$$PROD_SSH_HOST && \
+		sleep 2 && \
+		echo "$(GREEN)==> Dumping production database...$(RESET)" && \
+		docker run --rm -v /tmp:/tmp -e PGPASSWORD=$$PROD_DB_PASSWORD postgres:17-alpine \
+			pg_dump -h host.docker.internal -p 5433 -U $$PROD_DB_USER -Fc $$PROD_DB_NAME -f /tmp/prod_dump.dump && \
+		echo "$(GREEN)==> Restoring to local database...$(RESET)" && \
+		bin/rails db:drop db:create && \
+		docker run --rm -v /tmp:/tmp postgres:17-alpine \
+			pg_restore --verbose --clean --no-acl --no-owner -h host.docker.internal -U $(USER) -d the_mcculloughs_org_development /tmp/prod_dump.dump; \
+		rm -f /tmp/prod_dump.dump; \
+		pkill -f "ssh.*5433.*$$PROD_SSH_HOST" || true; \
+		echo "$(GREEN)==> Production database pulled successfully$(RESET)"'
+
+local.db.pull.dump-only: ## Just dump production DB (no restore)
+	@echo "$(GREEN)==> Dumping production database...$(RESET)"
+	@mkdir -p db/backups
+	@bash -c 'set -a; source .env.production; set +a; \
+		ssh -f -N -L 5433:$$PROD_DB_HOST:$$PROD_DB_PORT $$PROD_SSH_USER@$$PROD_SSH_HOST && \
+		sleep 2 && \
+		docker run --rm -v $(PWD)/db/backups:/backups -e PGPASSWORD=$$PROD_DB_PASSWORD postgres:17-alpine \
+			pg_dump -h host.docker.internal -p 5433 -U $$PROD_DB_USER -Fc $$PROD_DB_NAME -f /backups/prod_$$(date +%Y%m%d_%H%M%S).dump && \
+		pkill -f "ssh.*5433.*$$PROD_SSH_HOST" || true && \
+		echo "$(GREEN)==> Dump saved to db/backups/$(RESET)"'
+
+local.storage.pull: ## Sync S3 images to local storage (downloads by blob key)
+	@echo "$(GREEN)==> Downloading S3 images to local storage...$(RESET)"
+	@bash -c 'set -a; source .env.production; set +a; bin/rails storage:pull_from_s3'
+	@echo "$(GREEN)==> Storage sync complete$(RESET)"
+
+local.pull: local.db.pull local.storage.pull ## Pull both database and storage from production
+
 backup.db: ## Backup database to db/backups/
 	@mkdir -p db/backups
 	@echo "$(GREEN)==> Backing up database...$(RESET)"

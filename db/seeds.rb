@@ -7,8 +7,8 @@ puts "🌱 Seeding database..."
 # Create admin user
 admin = User.find_or_create_by!(email: "admin@the-mcculloughs.org") do |user|
   user.name = "Admin User"
-  user.password = "password123"
-  user.password_confirmation = "password123"
+  user.password = "password1234"
+  user.password_confirmation = "password1234"
   user.role = :admin
 end
 puts "✅ Created admin user: #{admin.email}"
@@ -16,16 +16,16 @@ puts "✅ Created admin user: #{admin.email}"
 # Create member users
 member1 = User.find_or_create_by!(email: "john@the-mcculloughs.org") do |user|
   user.name = "John McCullough"
-  user.password = "password123"
-  user.password_confirmation = "password123"
+  user.password = "password1234"
+  user.password_confirmation = "password1234"
   user.role = :member
 end
 puts "✅ Created member user: #{member1.email}"
 
 member2 = User.find_or_create_by!(email: "jane@the-mcculloughs.org") do |user|
   user.name = "Jane McCullough"
-  user.password = "password123"
-  user.password_confirmation = "password123"
+  user.password = "password1234"
+  user.password_confirmation = "password1234"
   user.role = :member
 end
 puts "✅ Created member user: #{member2.email}"
@@ -52,6 +52,6 @@ puts "✅ Created gallery: #{gallery3.title}"
 puts "🎉 Seeding complete!"
 puts ""
 puts "📧 You can log in with:"
-puts "   Admin: admin@the-mcculloughs.org / password123"
-puts "   Member 1: john@the-mcculloughs.org / password123"
-puts "   Member 2: jane@the-mcculloughs.org / password123"
+puts "   Admin: admin@the-mcculloughs.org / password1234"
+puts "   Member 1: john@the-mcculloughs.org / password1234"
+puts "   Member 2: jane@the-mcculloughs.org / password1234"
