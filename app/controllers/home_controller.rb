@@ -3,7 +3,7 @@ class HomeController < ApplicationController
 
   def index
     if user_signed_in?
-      redirect_to galleries_path
+      redirect_to dashboard_path
     else
       @public_photos = Upload.publicly_visible
                              .includes(file_attachment: :blob)

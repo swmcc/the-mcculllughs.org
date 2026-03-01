@@ -1,15 +1,19 @@
 class Users::RegistrationsController < Devise::RegistrationsController
+  # Disable public sign-ups
+  def new
+    redirect_to root_path, alert: "Registration is currently closed."
+  end
+
+  def create
+    redirect_to root_path, alert: "Registration is currently closed."
+  end
+
   def update
     # If password fields are blank, update without password
     if params[:user][:password].blank? && params[:user][:password_confirmation].blank?
       params[:user].delete(:password)
       params[:user].delete(:password_confirmation)
       params[:user].delete(:current_password)
-
-      # Don't update spotify_client_secret if blank (preserve existing)
-      if params[:user][:spotify_client_secret].blank?
-        params[:user].delete(:spotify_client_secret)
-      end
 
       if resource.update(account_update_params_without_password)
         bypass_sign_in resource, scope: resource_name
@@ -26,7 +30,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   protected
 
   def account_update_params_without_password
-    params.require(:user).permit(:name, :email, :spotify_client_id, :spotify_client_secret)
+    params.require(:user).permit(:name, :email)
   end
 
   def after_update_path_for(resource)

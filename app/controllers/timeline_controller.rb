@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TimelineController < ApplicationController
-  before_action :authenticate_user!
+  skip_before_action :authenticate_user!
 
   SAMPLE_LIMIT = 10
 
@@ -30,9 +30,7 @@ class TimelineController < ApplicationController
   private
 
   def base_scope
-    scope = Upload.where.not(date_taken: nil)
-    scope = scope.where(user_id: current_user.id) unless current_user.admin?
-    scope
+    Upload.where.not(date_taken: nil).where(is_public: true)
   end
 
   def parse_decade(decade_param)
