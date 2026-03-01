@@ -1595,6 +1595,13 @@ CREATE UNIQUE INDEX index_uploads_on_short_code ON public.uploads USING btree (s
 
 
 --
+-- Name: index_uploads_on_user_gallery_created; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_uploads_on_user_gallery_created ON public.uploads USING btree (user_id, gallery_id, created_at);
+
+
+--
 -- Name: index_uploads_on_user_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1790,6 +1797,7 @@ ALTER TABLE ONLY public.galleries
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260301103950'),
 ('20260222182333'),
 ('20260222100000'),
 ('20260222095947'),

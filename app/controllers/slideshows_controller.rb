@@ -17,7 +17,7 @@ class SlideshowsController < ApplicationController
     else
       current_user.slideshows.find(params[:id])
     end
-    @uploads = @slideshow.uploads
+    @uploads = @slideshow.uploads.with_file
 
     @images_data = @uploads.select { |u| u.file.attached? }.map.with_index do |u, i|
       {

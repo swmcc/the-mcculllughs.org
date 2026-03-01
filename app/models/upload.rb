@@ -34,6 +34,7 @@ class Upload < ApplicationRecord
   scope :videos, -> { where("uploads.file_content_type LIKE ?", "video/%") }
   scope :publicly_visible, -> { where(is_public: true) }
   scope :from_import, -> { where.not(import_id: nil) }
+  scope :with_file, -> { includes(file_attachment: :blob) }
 
   # Import helpers
   def imported?
