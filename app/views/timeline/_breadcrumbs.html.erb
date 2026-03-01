@@ -1,0 +1,34 @@
+<nav class="flex items-center gap-2 text-sm text-neutral-500 mb-6">
+  <%= link_to timeline_path, class: "hover:text-neutral-800 transition-colors" do %>
+    Timeline
+  <% end %>
+
+  <% if local_assigns[:decade_start] %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+    <% if local_assigns[:year] %>
+      <%= link_to "#{decade_start}s", timeline_decade_path(decade: "#{decade_start}s"), class: "hover:text-neutral-800 transition-colors" %>
+    <% else %>
+      <span class="text-neutral-800"><%= decade_start %>s</span>
+    <% end %>
+  <% end %>
+
+  <% if local_assigns[:year] %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+    <% if local_assigns[:month] %>
+      <%= link_to year, timeline_year_path(decade: "#{decade_start}s", year: year), class: "hover:text-neutral-800 transition-colors" %>
+    <% else %>
+      <span class="text-neutral-800"><%= year %></span>
+    <% end %>
+  <% end %>
+
+  <% if local_assigns[:month] %>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+    </svg>
+    <span class="text-neutral-800"><%= Date::MONTHNAMES[month] %></span>
+  <% end %>
+</nav>

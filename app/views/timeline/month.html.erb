@@ -1,0 +1,75 @@
+<%
+  images_data = @uploads.to_a.select { |u| u.file.attached? }.map.with_index do |u, i|
+    {
+      id: u.id,
+      index: i,
+      title: u.title,
+      caption: u.caption,
+      date_taken: u.date_taken&.to_s,
+      gallery_title: u.gallery.title,
+      gallery_path: gallery_path(u.gallery, anchor: dom_id(u)),
+      original: url_for(u.file),
+      thumb: upload_variant_url(u, :thumb),
+      medium: upload_variant_url(u, :medium),
+      large: upload_variant_url(u, :large),
+      thumb_webp: upload_variant_url(u, :thumb, format: :webp),
+      medium_webp: upload_variant_url(u, :medium, format: :webp),
+      large_webp: upload_variant_url(u, :large, format: :webp)
+    }
+  end
+%>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+     data-controller="search-lightbox"
+     data-search-lightbox-images-value="<%= images_data.to_json %>"
+     data-action="keydown@window->search-lightbox#keydown">
+
+  <%= render "timeline/breadcrumbs", decade_start: @decade_start, year: @year, month: @month %>
+
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-800 mb-2">
+      <%= Date::MONTHNAMES[@month] %> <%= @year %>
+    </h1>
+    <p class="text-neutral-500 text-sm"><%= pluralize(@uploads.size, 'photo') %></p>
+  </div>
+
+  <% if @uploads.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+      <% @uploads.each_with_index do |upload, index| %>
+        <% next unless upload.file.attached? %>
+        <a href="#" data-action="click->search-lightbox#open" data-index="<%= index %>" class="group block">
+          <div class="relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+            <%= upload_picture_tag upload, :thumb,
+                class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+                loading: "lazy",
+                alt: upload.title %>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div class="absolute bottom-0 left-0 right-0 p-3">
+                <% if upload.title.present? %>
+                  <p class="text-white text-sm font-medium mb-1 line-clamp-1"><%= upload.title %></p>
+                <% end %>
+                <p class="text-white/70 text-xs"><%= upload.gallery.title %></p>
+                <% if upload.date_taken.present? %>
+                  <p class="text-white/50 text-xs"><%= upload.date_taken.strftime("%d %b %Y") %></p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </a>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-20">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-neutral-100 rounded-full mb-4">
+        <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-neutral-800 mb-2">No photos in <%= Date::MONTHNAMES[@month] %> <%= @year %></h3>
+      <p class="text-neutral-500 text-sm">Photos from this month will appear here</p>
+    </div>
+  <% end %>
+
+  <!-- Lightbox modal -->
+  <%= render "timeline/lightbox_modal" %>
+</div>
