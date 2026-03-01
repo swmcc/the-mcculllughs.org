@@ -11,6 +11,15 @@ Rails.application.routes.draw do
   # Search
   get "search", to: "search#index"
 
+  # Timeline - hierarchical date-based photo browser
+  get "timeline", to: "timeline#index", as: :timeline
+  get "timeline/:decade", to: "timeline#decade", as: :timeline_decade,
+      constraints: { decade: /\d{4}s/ }
+  get "timeline/:decade/:year", to: "timeline#year", as: :timeline_year,
+      constraints: { decade: /\d{4}s/, year: /\d{4}/ }
+  get "timeline/:decade/:year/:month", to: "timeline#month", as: :timeline_month,
+      constraints: { decade: /\d{4}s/, year: /\d{4}/, month: /\d{1,2}/ }
+
   # Spotify search API
   get "spotify/search", to: "spotify#search"
 
