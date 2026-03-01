@@ -27,7 +27,14 @@ Rails.application.routes.draw do
   end
 
   # Saved slideshows
-  resources :slideshows, only: [ :index, :show, :create, :edit, :update, :destroy ]
+  resources :slideshows, only: [ :index, :show, :create, :edit, :update, :destroy ] do
+    collection do
+      get :search
+    end
+    member do
+      post :add_uploads
+    end
+  end
 
   # External photo imports
   resources :imports, only: [ :index ] do

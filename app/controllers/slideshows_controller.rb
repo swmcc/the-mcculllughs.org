@@ -85,6 +85,58 @@ class SlideshowsController < ApplicationController
     redirect_to slideshows_path, notice: "Slideshow deleted"
   end
 
+  def search
+    query = params[:q].to_s.strip
+    slideshows = current_user.slideshows
+                             .includes(uploads: { file_attachment: :blob })
+                             .order(updated_at: :desc)
+
+    slideshows = slideshows.where("title ILIKE ?", "%#{query}%") if query.present?
+
+    render json: slideshows.limit(10).map { |s|
+      cover = s.uploads.first
+      {
+        id: s.id,
+        title: s.title,
+        photo_count: s.uploads.size,
+        cover_url: cover&.file&.attached? ? upload_variant_url(cover, :thumb) : nil
+      }
+    }
+  end
+
+  def add_uploads
+    @slideshow = current_user.slideshows.find(params[:id])
+
+    upload_ids = params[:upload_ids] || []
+    return render json: { error: "No photos selected" }, status: :unprocessable_content if upload_ids.empty?
+
+    # Validate uploads belong to current user
+    valid_uploads = if current_user.admin?
+      Upload.where(id: upload_ids)
+    else
+      Upload.joins(:gallery).where(id: upload_ids, galleries: { user_id: current_user.id })
+    end
+
+    # Get current max position
+    max_position = @slideshow.slideshow_uploads.maximum(:position) || -1
+
+    added_count = 0
+    valid_uploads.each do |upload|
+      # Skip if already in slideshow
+      next if @slideshow.slideshow_uploads.exists?(upload_id: upload.id)
+
+      max_position += 1
+      @slideshow.slideshow_uploads.create!(upload_id: upload.id, position: max_position)
+      added_count += 1
+    end
+
+    render json: {
+      success: true,
+      added_count: added_count,
+      total_count: @slideshow.uploads.count
+    }
+  end
+
   private
 
   def slideshow_params
