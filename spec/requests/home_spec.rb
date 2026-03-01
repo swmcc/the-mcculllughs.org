@@ -14,9 +14,9 @@ RSpec.describe "Home", type: :request do
 
       before { login_as user, scope: :user }
 
-      it "redirects to galleries" do
+      it "redirects to dashboard" do
         get "/"
-        expect(response).to redirect_to(galleries_path)
+        expect(response).to redirect_to(dashboard_path)
       end
     end
   end

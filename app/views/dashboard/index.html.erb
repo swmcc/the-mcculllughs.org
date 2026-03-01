@@ -1,0 +1,153 @@
+<% content_for :title, "Dashboard" %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-semibold text-neutral-800 mb-1">Welcome back, <%= current_user.name.split.first %></h1>
+    <p class="text-sm text-neutral-500">Here's what's happening with your photos</p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+    <!-- Galleries Card -->
+    <%= link_to galleries_path, class: "group bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-lg hover:border-blue-200 hover:-translate-y-1 transition-all duration-300" do %>
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-lg font-semibold text-neutral-800 group-hover:text-blue-600 transition-colors">Galleries</h2>
+            <span class="text-2xl font-bold text-blue-600"><%= @stats[:galleries] %></span>
+          </div>
+          <p class="text-sm text-neutral-500">Organize photos into collections</p>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Slideshows Card -->
+    <%= link_to slideshows_path, class: "group bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-lg hover:border-purple-200 hover:-translate-y-1 transition-all duration-300" do %>
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-lg font-semibold text-neutral-800 group-hover:text-purple-600 transition-colors">Slideshows</h2>
+            <span class="text-2xl font-bold text-purple-600"><%= @stats[:slideshows] %></span>
+          </div>
+          <p class="text-sm text-neutral-500">Create shareable presentations</p>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Timeline Card -->
+    <%= link_to timeline_path, class: "group bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-lg hover:border-amber-200 hover:-translate-y-1 transition-all duration-300" do %>
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl group-hover:scale-110 transition-transform">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between mb-1">
+            <h2 class="text-lg font-semibold text-neutral-800 group-hover:text-amber-600 transition-colors">Timeline</h2>
+            <span class="text-2xl font-bold text-amber-600"><%= @stats[:public_photos] %></span>
+          </div>
+          <p class="text-sm text-neutral-500">Browse photos by date</p>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Stats Bar -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-neutral-50 rounded-xl p-4 text-center">
+      <div class="text-3xl font-bold text-neutral-800"><%= number_with_delimiter(@stats[:uploads]) %></div>
+      <div class="text-xs text-neutral-500 uppercase tracking-wide">Total Photos</div>
+    </div>
+    <div class="bg-neutral-50 rounded-xl p-4 text-center">
+      <div class="text-3xl font-bold text-green-600"><%= number_with_delimiter(@stats[:public_photos]) %></div>
+      <div class="text-xs text-neutral-500 uppercase tracking-wide">Public</div>
+    </div>
+    <div class="bg-neutral-50 rounded-xl p-4 text-center">
+      <div class="text-3xl font-bold text-blue-600"><%= @stats[:galleries] %></div>
+      <div class="text-xs text-neutral-500 uppercase tracking-wide">Galleries</div>
+    </div>
+    <div class="bg-neutral-50 rounded-xl p-4 text-center">
+      <div class="text-3xl font-bold text-purple-600"><%= @stats[:slideshows] %></div>
+      <div class="text-xs text-neutral-500 uppercase tracking-wide">Slideshows</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent Galleries -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-neutral-800">Recent Galleries</h2>
+        <%= link_to "View all", galleries_path, class: "text-sm text-blue-600 hover:text-blue-700" %>
+      </div>
+      <% if @recent_galleries.any? %>
+        <div class="grid grid-cols-2 gap-3">
+          <% @recent_galleries.each do |gallery| %>
+            <%= link_to gallery, class: "group block" do %>
+              <div class="bg-white rounded-xl overflow-hidden border border-neutral-200 hover:shadow-md hover:border-blue-200 transition-all">
+                <div class="aspect-video bg-neutral-100 overflow-hidden">
+                  <% if gallery.cover_photo&.file&.attached? %>
+                    <%= image_tag url_for(gallery.cover_photo.file.variant(ProcessMediaJob::VARIANTS[:thumb])),
+                        class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+                        loading: "lazy" %>
+                  <% else %>
+                    <div class="flex items-center justify-center h-full text-neutral-300">
+                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="p-3">
+                  <h3 class="text-sm font-medium text-neutral-800 truncate group-hover:text-blue-600 transition-colors"><%= gallery.title %></h3>
+                  <p class="text-xs text-neutral-500"><%= gallery.uploads.count %> photos</p>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-neutral-50 rounded-xl p-8 text-center">
+          <p class="text-neutral-500 text-sm mb-3">No galleries yet</p>
+          <%= link_to "Create your first gallery", new_gallery_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Recent Uploads -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-neutral-800">Recent Uploads</h2>
+        <%= link_to "Import photos", providers_imports_path, class: "text-sm text-blue-600 hover:text-blue-700" %>
+      </div>
+      <% if @recent_uploads.any? %>
+        <div class="grid grid-cols-4 gap-2">
+          <% @recent_uploads.each do |upload| %>
+            <%= link_to public_photo_path(upload.short_code), class: "group block aspect-square rounded-lg overflow-hidden bg-neutral-100" do %>
+              <%= image_tag url_for(upload.file.variant(ProcessMediaJob::VARIANTS[:thumb])),
+                  class: "w-full h-full object-cover group-hover:scale-105 transition-transform duration-300",
+                  loading: "lazy" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-neutral-50 rounded-xl p-8 text-center">
+          <p class="text-neutral-500 text-sm mb-3">No photos yet</p>
+          <%= link_to "Import your first photos", providers_imports_path, class: "text-sm text-blue-600 hover:text-blue-700 font-medium" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

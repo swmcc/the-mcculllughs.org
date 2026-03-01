@@ -4,6 +4,9 @@ Rails.application.routes.draw do
   # Root path - landing page for public, galleries for logged in
   root "home#index"
 
+  # Dashboard (logged-in home)
+  get "dashboard", to: "dashboard#index"
+
   # Static pages
   get "about", to: "pages#about"
   get "colophon", to: "pages#colophon"
@@ -19,9 +22,6 @@ Rails.application.routes.draw do
       constraints: { decade: /\d{4}s/, year: /\d{4}/ }
   get "timeline/:decade/:year/:month", to: "timeline#month", as: :timeline_month,
       constraints: { decade: /\d{4}s/, year: /\d{4}/, month: /\d{1,2}/ }
-
-  # Spotify search API
-  get "spotify/search", to: "spotify#search"
 
   # Galleries with nested uploads
   resources :galleries do

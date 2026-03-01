@@ -9,52 +9,9 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: vector; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
-
-
---
--- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
-
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
-
---
--- Name: _vector_smoketest; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public._vector_smoketest (
-    id bigint NOT NULL,
-    embedding public.vector(3)
-);
-
-
---
--- Name: _vector_smoketest_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public._vector_smoketest_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: _vector_smoketest_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public._vector_smoketest_id_seq OWNED BY public._vector_smoketest.id;
-
 
 --
 -- Name: active_storage_attachments; Type: TABLE; Schema: public; Owner: -
@@ -153,43 +110,6 @@ CREATE SEQUENCE public.active_storage_variant_records_id_seq
 --
 
 ALTER SEQUENCE public.active_storage_variant_records_id_seq OWNED BY public.active_storage_variant_records.id;
-
-
---
--- Name: api_keys; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.api_keys (
-    id bigint NOT NULL,
-    name character varying NOT NULL,
-    key character varying NOT NULL,
-    user_id bigint NOT NULL,
-    scope character varying DEFAULT 'admin'::character varying NOT NULL,
-    last_used_at timestamp(6) without time zone,
-    expires_at timestamp(6) without time zone,
-    revoked_at timestamp(6) without time zone,
-    created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL
-);
-
-
---
--- Name: api_keys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.api_keys_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: api_keys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.api_keys_id_seq OWNED BY public.api_keys.id;
 
 
 --
@@ -787,13 +707,7 @@ CREATE TABLE public.uploads (
     is_public boolean DEFAULT false NOT NULL,
     external_photo_id character varying,
     import_id bigint,
-    import_metadata jsonb DEFAULT '{}'::jsonb,
-    analysis_status character varying DEFAULT 'pending'::character varying NOT NULL,
-    analysis_error text,
-    analyzed_at timestamp(6) without time zone,
-    analysis_version character varying,
-    ai_analysis jsonb DEFAULT '{}'::jsonb,
-    embedding public.vector(768)
+    import_metadata jsonb DEFAULT '{}'::jsonb
 );
 
 
@@ -830,9 +744,7 @@ CREATE TABLE public.users (
     name character varying,
     role integer DEFAULT 0 NOT NULL,
     created_at timestamp(6) without time zone NOT NULL,
-    updated_at timestamp(6) without time zone NOT NULL,
-    spotify_client_id character varying,
-    spotify_client_secret character varying
+    updated_at timestamp(6) without time zone NOT NULL
 );
 
 
@@ -856,13 +768,6 @@ ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: _vector_smoketest id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public._vector_smoketest ALTER COLUMN id SET DEFAULT nextval('public._vector_smoketest_id_seq'::regclass);
-
-
---
 -- Name: active_storage_attachments id; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -881,13 +786,6 @@ ALTER TABLE ONLY public.active_storage_blobs ALTER COLUMN id SET DEFAULT nextval
 --
 
 ALTER TABLE ONLY public.active_storage_variant_records ALTER COLUMN id SET DEFAULT nextval('public.active_storage_variant_records_id_seq'::regclass);
-
-
---
--- Name: api_keys id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.api_keys ALTER COLUMN id SET DEFAULT nextval('public.api_keys_id_seq'::regclass);
 
 
 --
@@ -1017,14 +915,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 
 
 --
--- Name: _vector_smoketest _vector_smoketest_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public._vector_smoketest
-    ADD CONSTRAINT _vector_smoketest_pkey PRIMARY KEY (id);
-
-
---
 -- Name: active_storage_attachments active_storage_attachments_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -1046,14 +936,6 @@ ALTER TABLE ONLY public.active_storage_blobs
 
 ALTER TABLE ONLY public.active_storage_variant_records
     ADD CONSTRAINT active_storage_variant_records_pkey PRIMARY KEY (id);
-
-
---
--- Name: api_keys api_keys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.api_keys
-    ADD CONSTRAINT api_keys_pkey PRIMARY KEY (id);
 
 
 --
@@ -1249,20 +1131,6 @@ CREATE UNIQUE INDEX index_active_storage_blobs_on_key ON public.active_storage_b
 --
 
 CREATE UNIQUE INDEX index_active_storage_variant_records_uniqueness ON public.active_storage_variant_records USING btree (blob_id, variation_digest);
-
-
---
--- Name: index_api_keys_on_key; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX index_api_keys_on_key ON public.api_keys USING btree (key);
-
-
---
--- Name: index_api_keys_on_user_id; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_api_keys_on_user_id ON public.api_keys USING btree (user_id);
 
 
 --
@@ -1546,27 +1414,6 @@ CREATE INDEX index_solid_queue_semaphores_on_key_and_value ON public.solid_queue
 
 
 --
--- Name: index_uploads_on_ai_analysis; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_uploads_on_ai_analysis ON public.uploads USING gin (ai_analysis);
-
-
---
--- Name: index_uploads_on_analysis_status; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_uploads_on_analysis_status ON public.uploads USING btree (analysis_status);
-
-
---
--- Name: index_uploads_on_embedding; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX index_uploads_on_embedding ON public.uploads USING hnsw (embedding public.vector_cosine_ops);
-
-
---
 -- Name: index_uploads_on_external_photo_id_and_import_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1644,14 +1491,6 @@ ALTER TABLE ONLY public.uploads
 
 ALTER TABLE ONLY public.solid_queue_recurring_executions
     ADD CONSTRAINT fk_rails_318a5533ed FOREIGN KEY (job_id) REFERENCES public.solid_queue_jobs(id) ON DELETE CASCADE;
-
-
---
--- Name: api_keys fk_rails_32c28d0dc2; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.api_keys
-    ADD CONSTRAINT fk_rails_32c28d0dc2 FOREIGN KEY (user_id) REFERENCES public.users(id);
 
 
 --
@@ -1797,11 +1636,9 @@ ALTER TABLE ONLY public.galleries
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260301194500'),
 ('20260301103950'),
 ('20260222182333'),
-('20260222100000'),
-('20260222095947'),
-('20260222095928'),
 ('20260221095843'),
 ('20260221094539'),
 ('20260221093527'),
