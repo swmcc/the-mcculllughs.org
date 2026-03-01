@@ -7,7 +7,7 @@ FactoryBot.define do
 
     after(:build) do |upload|
       upload.file.attach(
-        io: StringIO.new("fake image data"),
+        io: Rails.root.join("spec/fixtures/files/test_image.jpg").open,
         filename: "test_image.jpg",
         content_type: "image/jpeg"
       )
