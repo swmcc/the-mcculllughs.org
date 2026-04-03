@@ -26,24 +26,31 @@ A modern, mobile-first, private photo and video sharing application built with R
 - **Background Jobs**: Solid Queue (database-backed, no Redis)
 - **Testing**: RSpec with Factory Bot
 - **Image Processing**: ImageProcessing + MiniMagick
+- **EXIF Extraction**: MiniExiftool
 
 ## Prerequisites
 
 - Ruby 3.3.0 or higher
 - PostgreSQL
 - ImageMagick (for image processing)
+- ExifTool (for EXIF metadata extraction)
 - Node.js (for asset compilation)
 
-### Install ImageMagick
+### Install System Dependencies
 
-**macOS:**
+**macOS (using Brewfile):**
 ```bash
-brew install imagemagick
+brew bundle
+```
+
+Or install manually:
+```bash
+brew install postgresql@17 imagemagick vips exiftool node
 ```
 
 **Ubuntu/Debian:**
 ```bash
-sudo apt-get install imagemagick
+sudo apt-get install postgresql imagemagick libvips libimage-exiftool-perl nodejs
 ```
 
 ## Setup Instructions
@@ -275,6 +282,17 @@ brew install imagemagick
 
 # Verify installation
 convert --version
+```
+
+### ExifTool Not Found
+
+If you get errors about ExifTool or EXIF extraction:
+```bash
+# macOS
+brew install exiftool
+
+# Verify installation
+exiftool -ver
 ```
 
 ### Database Connection Issues
