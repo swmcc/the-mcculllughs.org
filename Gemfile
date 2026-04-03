@@ -5,6 +5,7 @@ gem "bootsnap", require: false
 gem "devise"
 gem "dotenv-rails"
 gem "image_processing", "~> 1.2"
+gem "mini_exiftool", "~> 2.11"
 gem "importmap-rails"
 gem "jbuilder"
 gem "kamal", require: false
