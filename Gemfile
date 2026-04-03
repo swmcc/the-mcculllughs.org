@@ -12,7 +12,7 @@ gem "kamal", require: false
 gem "pg", "~> 1.1"
 gem "propshaft"
 gem "puma", ">= 5.0"
-gem "rails", "~> 8.1.0"
+gem "rails", "~> 8.1.3"
 gem "redis", ">= 4.0.1"
 gem "solid_cache"
 gem "solid_queue"
