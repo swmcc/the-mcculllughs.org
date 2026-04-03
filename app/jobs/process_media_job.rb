@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "mini_exiftool"
+
 class ProcessMediaJob < ApplicationJob
   queue_as :default
 
@@ -16,6 +18,7 @@ class ProcessMediaJob < ApplicationJob
 
     if upload.file.content_type.start_with?("image/")
       generate_variants(upload)
+      extract_exif_data(upload)
     elsif upload.file.content_type.start_with?("video/")
       process_video(upload)
     end
@@ -30,6 +33,35 @@ class ProcessMediaJob < ApplicationJob
     rescue StandardError => e
       Rails.logger.error "Failed to generate #{name} variant for upload #{upload.id}: #{e.message}"
     end
+  end
+
+  def extract_exif_data(upload)
+    upload.file.open do |tempfile|
+      exif = MiniExiftool.new(tempfile.path)
+      exif_hash = exif.to_hash
+
+      updates = { exif_data: exif_hash }
+
+      if upload.date_taken.blank? && exif_hash["DateTimeOriginal"].present?
+        updates[:date_taken] = parse_exif_date(exif_hash["DateTimeOriginal"])
+      end
+
+      upload.update!(updates)
+      Rails.logger.info "Extracted EXIF data for upload #{upload.id}"
+    end
+  rescue StandardError => e
+    Rails.logger.error "Failed to extract EXIF data for upload #{upload.id}: #{e.message}"
+  end
+
+  def parse_exif_date(date_value)
+    case date_value
+    when Time, DateTime, Date
+      date_value.to_date
+    when String
+      Time.zone.parse(date_value)&.to_date
+    end
+  rescue ArgumentError
+    nil
   end
 
   def process_video(upload)

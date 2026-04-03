@@ -707,7 +707,8 @@ CREATE TABLE public.uploads (
     is_public boolean DEFAULT false NOT NULL,
     external_photo_id character varying,
     import_id bigint,
-    import_metadata jsonb DEFAULT '{}'::jsonb
+    import_metadata jsonb DEFAULT '{}'::jsonb,
+    exif_data jsonb
 );
 
 
@@ -1636,6 +1637,7 @@ ALTER TABLE ONLY public.galleries
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260403225247'),
 ('20260301194500'),
 ('20260301103950'),
 ('20260222182333'),
