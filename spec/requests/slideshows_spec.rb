@@ -176,6 +176,92 @@ RSpec.describe "Slideshows", type: :request do
     end
   end
 
+  describe "DELETE /slideshows/:id/remove_upload" do
+    let!(:slideshow) { create(:slideshow, user: user, title: "My Slideshow") }
+
+    before do
+      uploads.each_with_index do |upload, index|
+        slideshow.slideshow_uploads.create!(upload: upload, position: index)
+      end
+    end
+
+    it "removes an upload from the slideshow" do
+      expect {
+        delete remove_upload_slideshow_path(slideshow), params: {
+          upload_id: uploads.first.id
+        }, as: :json
+      }.to change { slideshow.uploads.count }.by(-1)
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      expect(json["success"]).to be true
+      expect(json["total_count"]).to eq(2)
+    end
+
+    it "does not delete the actual upload" do
+      expect {
+        delete remove_upload_slideshow_path(slideshow), params: {
+          upload_id: uploads.first.id
+        }, as: :json
+      }.not_to change(Upload, :count)
+    end
+
+    it "prevents removing from other user's slideshow" do
+      other_slideshow = create(:slideshow, user: other_user)
+
+      delete remove_upload_slideshow_path(other_slideshow), params: {
+        upload_id: uploads.first.id
+      }, as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "handles HTML format with redirect" do
+      delete remove_upload_slideshow_path(slideshow), params: {
+        upload_id: uploads.first.id
+      }
+
+      expect(response).to redirect_to(edit_slideshow_path(slideshow))
+    end
+  end
+
+  describe "PATCH /slideshows/:id/reorder_uploads" do
+    let!(:slideshow) { create(:slideshow, user: user, title: "My Slideshow") }
+
+    before do
+      uploads.each_with_index do |upload, index|
+        slideshow.slideshow_uploads.create!(upload: upload, position: index)
+      end
+    end
+
+    it "reorders uploads in the slideshow" do
+      reversed_ids = uploads.reverse.map(&:id)
+
+      patch reorder_uploads_slideshow_path(slideshow), params: {
+        upload_ids: reversed_ids
+      }, as: :json
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      expect(json["success"]).to be true
+
+      # Check new positions
+      slideshow.reload
+      ordered_uploads = slideshow.slideshow_uploads.order(:position).map(&:upload_id)
+      expect(ordered_uploads).to eq(reversed_ids)
+    end
+
+    it "prevents reordering other user's slideshow" do
+      other_slideshow = create(:slideshow, user: other_user)
+
+      patch reorder_uploads_slideshow_path(other_slideshow), params: {
+        upload_ids: uploads.map(&:id)
+      }, as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "admin access" do
     let(:admin) { create(:user, :admin) }
 

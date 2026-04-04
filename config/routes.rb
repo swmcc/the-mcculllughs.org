@@ -42,6 +42,8 @@ Rails.application.routes.draw do
     end
     member do
       post :add_uploads
+      delete :remove_upload
+      patch :reorder_uploads
     end
   end
 
