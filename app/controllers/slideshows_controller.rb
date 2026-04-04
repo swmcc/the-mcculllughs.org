@@ -67,7 +67,17 @@ class SlideshowsController < ApplicationController
   end
 
   def edit
-    @slideshow = current_user.slideshows.find(params[:id])
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
+    @slideshow_uploads = @slideshow.slideshow_uploads.includes(upload: { file_attachment: :blob })
+    @galleries = if current_user.admin?
+      Gallery.includes(uploads: { file_attachment: :blob }).order(:title)
+    else
+      current_user.galleries.includes(uploads: { file_attachment: :blob }).order(:title)
+    end
   end
 
   def update
@@ -104,8 +114,50 @@ class SlideshowsController < ApplicationController
     }
   end
 
+  def remove_upload
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
+
+    slideshow_upload = @slideshow.slideshow_uploads.find_by(upload_id: params[:upload_id])
+
+    if slideshow_upload&.destroy
+      respond_to do |format|
+        format.html { redirect_to edit_slideshow_path(@slideshow), notice: "Photo removed from slideshow" }
+        format.json { render json: { success: true, total_count: @slideshow.uploads.count } }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to edit_slideshow_path(@slideshow), alert: "Could not remove photo" }
+        format.json { render json: { error: "Could not remove photo" }, status: :unprocessable_content }
+      end
+    end
+  end
+
+  def reorder_uploads
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
+
+    upload_ids = params[:upload_ids] || []
+
+    upload_ids.each_with_index do |upload_id, index|
+      @slideshow.slideshow_uploads.where(upload_id: upload_id).update_all(position: index)
+    end
+
+    render json: { success: true }
+  end
+
   def add_uploads
-    @slideshow = current_user.slideshows.find(params[:id])
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
 
     upload_ids = params[:upload_ids] || []
     return render json: { error: "No photos selected" }, status: :unprocessable_content if upload_ids.empty?
