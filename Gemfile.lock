@@ -233,6 +233,8 @@ GEM
     msgpack (1.8.0)
     multi_xml (0.8.1)
       bigdecimal (>= 3.1, < 5)
+    neighbor (1.0.0)
+      activerecord (>= 7.2)
     net-http (0.9.1)
       uri (>= 0.11.1)
     net-imap (0.6.2)
@@ -525,6 +527,7 @@ DEPENDENCIES
   jbuilder
   kamal
   mini_exiftool (~> 2.11)
+  neighbor
   oauth (~> 1.1)
   oauth2 (~> 2.0)
   pg (~> 1.1)
