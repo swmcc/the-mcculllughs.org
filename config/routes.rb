@@ -71,6 +71,9 @@ Rails.application.routes.draw do
   # Public slideshow sharing (no auth required)
   get "s/:short_code", to: "public_slideshows#show", as: :public_slideshow
 
+  # API Keys management
+  resources :api_keys, only: [ :index, :new, :create, :show, :destroy ]
+
   # API namespace (for Indexatron integration)
   namespace :api do
     resources :uploads, only: [] do

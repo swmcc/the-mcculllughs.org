@@ -71,6 +71,9 @@
                   <%= link_to edit_user_registration_path, class: "block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
                     Settings
                   <% end %>
+                  <%= link_to api_keys_path, class: "block px-4 py-2 text-sm text-white/70 hover:text-white hover:bg-white/5 transition-colors" do %>
+                    API Keys
+                  <% end %>
                   <% if current_user.admin? %>
                     <div class="border-t border-white/10 my-1"></div>
                     <%= link_to admin_users_path, class: "block px-4 py-2 text-sm text-violet-400 hover:text-violet-300 hover:bg-white/5 transition-colors" do %>
