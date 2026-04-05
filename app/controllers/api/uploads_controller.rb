@@ -39,14 +39,20 @@ module Api
     def analysis_params
       permitted = {}
 
-      # Explicitly permit analysis_data fields
+      # Explicitly permit full Indexatron analysis schema
       if params[:analysis_data].present?
         permitted[:analysis_data] = params.require(:analysis_data).permit(
-          :event,
-          :setting,
-          :era_estimate,
-          theme: [],
-          subjects: []
+          :description,
+          :mood,
+          :filename,
+          :analyzed_at,
+          :model_used,
+          location: [ :setting, :type, :specific ],
+          era: [ :decade, :confidence, :reasoning ],
+          people: [ :description, :estimated_age, :position ],
+          categories: [],
+          colors: [],
+          objects: []
         )
       end
 

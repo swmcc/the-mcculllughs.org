@@ -94,11 +94,25 @@ RSpec.describe "Api::Uploads", type: :request do
   describe "PATCH /api/uploads/:id/analysis" do
     let(:analysis_data) do
       {
-        event: "christmas",
-        theme: %w[family holiday],
-        setting: "living room",
-        subjects: [ "christmas tree", "presents" ],
-        era_estimate: "1990s"
+        description: "A family gathered around a Christmas tree opening presents",
+        mood: "joyful",
+        location: {
+          setting: "living room",
+          type: "indoor",
+          specific: nil
+        },
+        era: {
+          decade: "1990s",
+          confidence: "medium",
+          reasoning: "Clothing styles and photo quality suggest early 90s"
+        },
+        people: [
+          { description: "adult woman", estimated_age: "30s", position: "left" },
+          { description: "young child", estimated_age: "5-7", position: "center" }
+        ],
+        categories: %w[christmas family holiday],
+        colors: %w[red green gold],
+        objects: [ "christmas tree", "presents", "ornaments" ]
       }
     end
 
@@ -118,8 +132,10 @@ RSpec.describe "Api::Uploads", type: :request do
       expect(json["success"]).to be true
 
       upload_without_analysis.reload
-      expect(upload_without_analysis.analysis_data["event"]).to eq("christmas")
-      expect(upload_without_analysis.analysis_data["theme"]).to eq(%w[family holiday])
+      expect(upload_without_analysis.analysis_data["description"]).to include("Christmas tree")
+      expect(upload_without_analysis.analysis_data["categories"]).to eq(%w[christmas family holiday])
+      expect(upload_without_analysis.analysis_data["location"]["setting"]).to eq("living room")
+      expect(upload_without_analysis.analysis_data["era"]["decade"]).to eq("1990s")
     end
 
     it "updates embedding when provided" do
