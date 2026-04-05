@@ -172,7 +172,7 @@ export default class extends Controller {
 
     // Add all files
     this.files.forEach(file => {
-      formData.append('upload[file]', file)
+      formData.append('upload[file][]', file)
     })
 
     // Show uploading state
