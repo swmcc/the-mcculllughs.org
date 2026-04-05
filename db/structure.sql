@@ -9,6 +9,20 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+--
+-- Name: vector; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION vector; Type: COMMENT; Schema: -; Owner: -
+--
+
+COMMENT ON EXTENSION vector IS 'vector data type and ivfflat and hnsw access methods';
+
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -746,7 +760,8 @@ CREATE TABLE public.uploads (
     import_id bigint,
     import_metadata jsonb DEFAULT '{}'::jsonb,
     exif_data jsonb,
-    analysis_data jsonb
+    analysis_data jsonb,
+    embedding public.vector(768)
 );
 
 
@@ -1712,6 +1727,7 @@ ALTER TABLE ONLY public.galleries
 SET search_path TO "$user", public;
 
 INSERT INTO "schema_migrations" (version) VALUES
+('20260405223554'),
 ('20260405223216'),
 ('20260405222511'),
 ('20260403225247'),
