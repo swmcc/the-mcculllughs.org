@@ -1,0 +1,150 @@
+<% content_for :title, "API Key Created" %>
+
+<div class="max-w-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <% if @new_key %>
+    <!-- Success State - Key just created -->
+    <div class="mb-8 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-semibold text-neutral-800 mb-2">API Key Created!</h1>
+      <p class="text-neutral-500">Copy your key now - you won't be able to see it again.</p>
+    </div>
+
+    <!-- Key Display -->
+    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 mb-6">
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-neutral-700 mb-2">Name</label>
+        <div class="text-lg font-medium text-neutral-800"><%= @api_key.name %></div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-2">Your API Key</label>
+        <div class="relative">
+          <input
+            type="text"
+            value="<%= @new_key %>"
+            readonly
+            id="api-key-input"
+            class="w-full px-4 py-3 pr-24 bg-neutral-50 border border-neutral-300 rounded-lg font-mono text-sm select-all"
+          >
+          <button
+            type="button"
+            onclick="copyApiKey()"
+            id="copy-button"
+            class="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-sm font-medium rounded-md transition-colors"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning -->
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+        </svg>
+        <div class="text-sm text-red-700">
+          <p class="font-medium text-red-800">This is the only time you'll see this key!</p>
+          <p>Store it securely. If you lose it, you'll need to create a new one.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Usage Example -->
+    <div class="bg-neutral-800 rounded-xl p-6 mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-sm font-medium text-neutral-400">Usage Example</span>
+        <button
+          type="button"
+          onclick="copyExample()"
+          class="text-xs text-neutral-400 hover:text-white transition-colors"
+        >
+          Copy
+        </button>
+      </div>
+      <pre id="example-code" class="text-sm text-green-400 font-mono overflow-x-auto"><code># Set in your .env file
+INDEXATRON_API_KEY=<%= @new_key %>
+
+# Or use in Authorization header
+curl -H "Authorization: Bearer <%= @new_key %>" \
+  <%= request.base_url %>/api/uploads/pending</code></pre>
+    </div>
+
+    <%= link_to api_keys_path, class: "block w-full text-center px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-medium rounded-lg hover:from-amber-600 hover:to-orange-700 transition-all" do %>
+      Done - View All Keys
+    <% end %>
+
+    <script>
+      function copyApiKey() {
+        const input = document.getElementById('api-key-input');
+        const button = document.getElementById('copy-button');
+        navigator.clipboard.writeText(input.value);
+        button.textContent = 'Copied!';
+        button.classList.remove('bg-amber-500', 'hover:bg-amber-600');
+        button.classList.add('bg-green-500');
+        setTimeout(() => {
+          button.textContent = 'Copy';
+          button.classList.remove('bg-green-500');
+          button.classList.add('bg-amber-500', 'hover:bg-amber-600');
+        }, 2000);
+      }
+
+      function copyExample() {
+        const code = document.getElementById('example-code').textContent;
+        navigator.clipboard.writeText(code);
+      }
+    </script>
+
+  <% else %>
+    <!-- Already viewed - can't show key again -->
+    <div class="text-center py-12">
+      <div class="w-16 h-16 mx-auto mb-4 bg-neutral-100 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-semibold text-neutral-800 mb-2">API Key: <%= @api_key.name %></h1>
+      <p class="text-neutral-500 mb-6">The full key is no longer available. If you've lost it, create a new one.</p>
+
+      <div class="bg-white rounded-xl border border-neutral-200 p-6 mb-6 text-left">
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <span class="text-neutral-500">Key prefix</span>
+            <div class="font-mono">sk_****<%= @api_key.key.last(8) %></div>
+          </div>
+          <div>
+            <span class="text-neutral-500">Status</span>
+            <div>
+              <% if @api_key.active? %>
+                <span class="inline-flex items-center gap-1 text-green-700">
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Active
+                </span>
+              <% else %>
+                <span class="inline-flex items-center gap-1 text-red-700">
+                  <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                  Revoked
+                </span>
+              <% end %>
+            </div>
+          </div>
+          <div>
+            <span class="text-neutral-500">Created</span>
+            <div><%= @api_key.created_at.strftime("%-d %b %Y at %H:%M") %></div>
+          </div>
+          <div>
+            <span class="text-neutral-500">Last used</span>
+            <div><%= @api_key.last_used_at ? @api_key.last_used_at.strftime("%-d %b %Y at %H:%M") : "Never" %></div>
+          </div>
+        </div>
+      </div>
+
+      <%= link_to "Back to API Keys", api_keys_path, class: "inline-flex items-center gap-2 px-4 py-2 text-amber-600 hover:text-amber-700 font-medium transition-colors" %>
+    </div>
+  <% end %>
+</div>
