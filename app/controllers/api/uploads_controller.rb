@@ -37,9 +37,23 @@ module Api
     private
 
     def analysis_params
-      params.permit(:analysis_data, embedding: []).tap do |p|
-        p[:analysis_data] = params[:analysis_data].permit! if params[:analysis_data].is_a?(ActionController::Parameters)
+      permitted = {}
+
+      # Explicitly permit analysis_data fields
+      if params[:analysis_data].present?
+        permitted[:analysis_data] = params.require(:analysis_data).permit(
+          :event,
+          :setting,
+          :era_estimate,
+          theme: [],
+          subjects: []
+        )
       end
+
+      # Permit embedding as array of floats
+      permitted[:embedding] = params[:embedding] if params[:embedding].is_a?(Array)
+
+      permitted
     end
 
     def serialize_upload(upload)

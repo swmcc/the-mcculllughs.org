@@ -122,8 +122,21 @@ RSpec.describe "Api::Uploads", type: :request do
       expect(upload_without_analysis.analysis_data["theme"]).to eq(%w[family holiday])
     end
 
-    # TODO: Add embedding tests once pgvector migration is added
-    # The embedding column needs to be created with vector(768) type
+    it "updates embedding when provided" do
+      embedding = Array.new(768) { rand(-1.0..1.0) }
+
+      patch analysis_api_upload_path(upload_without_analysis),
+            params: { analysis_data: analysis_data, embedding: embedding },
+            headers: auth_headers,
+            as: :json
+
+      expect(response).to have_http_status(:success)
+
+      upload_without_analysis.reload
+      expect(upload_without_analysis.embedding).to be_present
+      expect(upload_without_analysis.embedding.length).to eq(768)
+    end
+
     it "updates analysis_data and returns success" do
       patch analysis_api_upload_path(upload_without_analysis),
             params: { analysis_data: analysis_data },
