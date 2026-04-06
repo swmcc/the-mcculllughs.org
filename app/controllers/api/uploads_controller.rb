@@ -9,6 +9,7 @@ module Api
       per_page = [ (params[:per_page] || 50).to_i, 100 ].min
 
       uploads = Upload.where(analysis_data: nil)
+                      .includes(:gallery)
                       .order(created_at: :asc)
                       .offset((page - 1) * per_page)
                       .limit(per_page)
@@ -71,7 +72,8 @@ module Api
         # Metadata for AI context
         title: upload.title,
         caption: upload.caption,
-        date_taken: upload.date_taken
+        date_taken: upload.date_taken,
+        gallery_name: upload.gallery&.title
       }
     end
   end
