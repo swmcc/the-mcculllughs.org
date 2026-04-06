@@ -4,6 +4,9 @@ class Upload < ApplicationRecord
   belongs_to :import, optional: true
   has_one :gallery_as_cover, class_name: "Gallery", foreign_key: "cover_upload_id", dependent: :nullify
 
+  # Vector search support for embeddings
+  has_neighbors :embedding
+
   # Active Storage attachments
   has_one_attached :file
   has_one_attached :thumbnail
