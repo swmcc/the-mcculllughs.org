@@ -49,7 +49,7 @@ module Api
           :model_used,
           location: [ :setting, :type, :specific ],
           era: [ :decade, :confidence, :reasoning ],
-          people: [ :description, :estimated_age, :position ],
+          people: [ :name, :description, :estimated_age, :position ],
           categories: [],
           colors: [],
           objects: []
@@ -67,7 +67,11 @@ module Api
         id: upload.id,
         short_code: upload.short_code,
         image_url: upload_variant_url(upload, :large),
-        created_at: upload.created_at
+        created_at: upload.created_at,
+        # Metadata for AI context
+        title: upload.title,
+        caption: upload.caption,
+        date_taken: upload.date_taken
       }
     end
   end
