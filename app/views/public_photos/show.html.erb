@@ -78,6 +78,16 @@
       <% if @upload.title.blank? && @upload.caption.blank? %>
         <p class="text-white/40 italic">Shared photo</p>
       <% end %>
+
+      <% if @upload.analysis_data.present? %>
+        <!-- Temporary: Analysis data display -->
+        <details class="mt-4">
+          <summary class="text-amber-500 text-sm cursor-pointer hover:text-amber-400">
+            View AI Analysis
+          </summary>
+          <pre class="mt-2 p-4 bg-black/50 rounded-lg text-xs text-green-400 overflow-x-auto"><%= JSON.pretty_generate(@upload.analysis_data) %></pre>
+        </details>
+      <% end %>
     </div>
   </div>
 </div>

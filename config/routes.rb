@@ -76,7 +76,7 @@ Rails.application.routes.draw do
 
   # API namespace (for Indexatron integration)
   namespace :api do
-    resources :uploads, only: [] do
+    resources :uploads, only: [ :show ] do
       collection do
         get :pending
       end

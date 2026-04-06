@@ -25,6 +25,13 @@ module Api
       }
     end
 
+    def show
+      upload = Upload.includes(:gallery).find_by!(short_code: params[:id])
+      render json: { upload: serialize_upload(upload) }
+    rescue ActiveRecord::RecordNotFound
+      render json: { error: "Upload not found" }, status: :not_found
+    end
+
     def analysis
       upload = Upload.find(params[:id])
 
@@ -73,7 +80,8 @@ module Api
         title: upload.title,
         caption: upload.caption,
         date_taken: upload.date_taken,
-        gallery_name: upload.gallery&.title
+        gallery_name: upload.gallery&.title,
+        gallery_description: upload.gallery&.description
       }
     end
   end
