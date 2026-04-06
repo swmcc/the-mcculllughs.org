@@ -66,7 +66,7 @@ module Api
       {
         id: upload.id,
         short_code: upload.short_code,
-        image_url: upload_variant_url(upload, :large),
+        image_url: upload_variant_url(upload, :medium),  # 1024px is enough for AI analysis
         created_at: upload.created_at,
         # Metadata for AI context
         title: upload.title,
