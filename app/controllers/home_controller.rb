@@ -8,7 +8,7 @@ class HomeController < ApplicationController
       @public_photos = Upload.publicly_visible
                              .includes(file_attachment: :blob)
                              .order("RANDOM()")
-                             .limit(100)
+                             .limit(500)
 
       # Pre-generate thumbnail URLs to avoid N controller redirects
       @photo_data = @public_photos.map do |photo|
