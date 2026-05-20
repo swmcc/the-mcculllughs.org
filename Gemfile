@@ -4,7 +4,7 @@ gem "aws-sdk-s3", require: false
 gem "bootsnap", require: false
 gem "devise"
 gem "dotenv-rails"
-gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 2.0"
 gem "mini_exiftool", "~> 2.11"
 gem "importmap-rails"
 gem "jbuilder"
