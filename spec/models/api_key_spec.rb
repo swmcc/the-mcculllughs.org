@@ -16,6 +16,32 @@ RSpec.describe ApiKey, type: :model do
       expect(api_key2).not_to be_valid
       expect(api_key2.errors[:key]).to include("has already been taken")
     end
+
+    it "validates scope is one of SCOPES" do
+      api_key = build(:api_key, scope: "everything")
+      expect(api_key).not_to be_valid
+      expect(api_key.errors[:scope]).to include("is not included in the list")
+    end
+
+    it "accepts each supported scope" do
+      ApiKey::SCOPES.each do |scope|
+        expect(build(:api_key, scope: scope)).to be_valid
+      end
+    end
+  end
+
+  describe "#can?" do
+    it "allows an admin key to do anything" do
+      api_key = build(:api_key, scope: "admin")
+      expect(api_key.can?("admin")).to be true
+      expect(api_key.can?("photos:create")).to be true
+    end
+
+    it "allows a photos:create key only its own scope" do
+      api_key = build(:api_key, :photos_create)
+      expect(api_key.can?("photos:create")).to be true
+      expect(api_key.can?("admin")).to be false
+    end
   end
 
   describe "key generation" do

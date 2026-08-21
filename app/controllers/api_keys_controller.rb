@@ -8,7 +8,8 @@ class ApiKeysController < ApplicationController
   end
 
   def new
-    @api_key = current_user.api_keys.build
+    # Least privilege by default - most keys only need to upload photos
+    @api_key = current_user.api_keys.build(scope: "photos:create")
   end
 
   def create
@@ -40,6 +41,6 @@ class ApiKeysController < ApplicationController
   end
 
   def api_key_params
-    params.require(:api_key).permit(:name)
+    params.require(:api_key).permit(:name, :scope)
   end
 end
