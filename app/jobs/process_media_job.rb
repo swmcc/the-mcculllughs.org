@@ -7,9 +7,9 @@ class ProcessMediaJob < ApplicationJob
 
   # WebP variant sizes - original file serves as fallback/download
   VARIANTS = {
-    thumb: { resize_to_fill: [ 400, 400 ], format: :webp, saver: { quality: 80 } },
-    medium: { resize_to_limit: [ 1024, 1024 ], format: :webp, saver: { quality: 80 } },
-    large: { resize_to_limit: [ 2048, 2048 ], format: :webp, saver: { quality: 80 } }
+    thumb: { resize_to_fill: [ 400, 400 ], format: :webp, saver: { quality: 80, strip: true } },
+    medium: { resize_to_limit: [ 1024, 1024 ], format: :webp, saver: { quality: 80, strip: true } },
+    large: { resize_to_limit: [ 2048, 2048 ], format: :webp, saver: { quality: 80, strip: true } }
   }.freeze
 
   def perform(upload_id)
