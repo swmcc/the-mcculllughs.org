@@ -6,6 +6,11 @@ module Api
     skip_before_action :authenticate_user!
 
     before_action :authenticate_api_key!
+    # Every API endpoint is admin-only by default. Subclasses opt individual
+    # actions into a lesser scope with:
+    #   skip_before_action :require_admin_scope!, only: [ :create ]
+    #   before_action -> { require_scope!("photos:create") }, only: [ :create ]
+    before_action :require_admin_scope!
 
     rescue_from ActiveRecord::RecordNotFound, with: :render_not_found_json
 
@@ -30,6 +35,16 @@ module Api
       return nil unless auth_header.present?
 
       auth_header.split(" ").last if auth_header.start_with?("Bearer ")
+    end
+
+    def require_admin_scope!
+      require_scope!("admin")
+    end
+
+    def require_scope!(required_scope)
+      return if current_api_key.can?(required_scope)
+
+      render json: { error: "Forbidden" }, status: :forbidden
     end
 
     def current_api_key

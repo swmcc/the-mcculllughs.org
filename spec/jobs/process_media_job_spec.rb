@@ -4,6 +4,14 @@ RSpec.describe ProcessMediaJob, type: :job do
   let(:user) { create(:user) }
   let(:gallery) { create(:gallery, user: user) }
 
+  describe "VARIANTS" do
+    it "strips metadata from every generated variant" do
+      ProcessMediaJob::VARIANTS.each_value do |options|
+        expect(options).to include(saver: hash_including(strip: true))
+      end
+    end
+  end
+
   describe "#perform" do
     it "is enqueued on the default queue" do
       expect(ProcessMediaJob.new.queue_name).to eq("default")
