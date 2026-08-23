@@ -6,7 +6,6 @@ RSpec.describe Upload, type: :model do
     it { is_expected.to belong_to(:gallery) }
     it { is_expected.to have_one(:gallery_as_cover).class_name("Gallery").with_foreign_key("cover_upload_id").dependent(:nullify) }
     it { is_expected.to have_one_attached(:file) }
-    it { is_expected.to have_one_attached(:thumbnail) }
   end
 
   describe "validations" do

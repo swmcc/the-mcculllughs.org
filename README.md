@@ -8,7 +8,7 @@ A modern, mobile-first, private photo and video sharing application built with R
 - **Role Management**: Admin and Member roles
 - **Photo Galleries**: Create and organize family photo galleries
 - **Media Upload**: Upload photos and videos with captions
-- **Image Processing**: Automatic thumbnail generation for all uploads
+- **Image Processing**: Automatic WebP variant generation (thumb/medium/large) for all uploads
 - **Mobile-First Design**: Beautiful, responsive interface built with TailwindCSS
 - **Real-time Updates**: Hotwire (Turbo + Stimulus) for smooth interactions
 - **Private & Secure**: Family-only access, no public sharing
@@ -164,7 +164,7 @@ COVERAGE=true bundle exec rspec
 This application uses Solid Queue for background job processing (database-backed, no Redis required for basic operation).
 
 Background jobs handle:
-- Image thumbnail generation
+- Image variant generation (WebP thumb/medium/large)
 - Video processing (placeholder for future implementation)
 
 Jobs are automatically processed when you run `bin/dev`.

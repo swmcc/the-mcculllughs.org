@@ -8,8 +8,9 @@ class Upload < ApplicationRecord
   has_neighbors :embedding
 
   # Active Storage attachments
+  # Rendering is variant-based: ProcessMediaJob generates WebP variants of :file
+  # (see ProcessMediaJob::VARIANTS). There is no separate thumbnail attachment.
   has_one_attached :file
-  has_one_attached :thumbnail
 
   # Callbacks
   before_validation :generate_short_code, on: :create

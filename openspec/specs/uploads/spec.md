@@ -2,7 +2,7 @@
 
 ## Overview
 
-The uploads domain handles media file uploads (photos and videos), storage via Active Storage, and automatic thumbnail generation through background processing.
+The uploads domain handles media file uploads (photos and videos), storage via Active Storage, and automatic WebP variant generation through background processing.
 
 ## Requirements
 
@@ -24,7 +24,8 @@ An Upload MUST belong to a Gallery.
 
 An Upload MUST have one attached file (via Active Storage).
 
-An Upload MUST have one attached thumbnail (via Active Storage).
+Derived renditions MUST be Active Storage variants of that file. An Upload MUST NOT
+declare a separate thumbnail attachment.
 
 ### REQ-UPL-003: Upload Validation
 
@@ -55,7 +56,7 @@ The dropzone MUST:
 
 The system MUST display file previews before upload.
 
-Image files MUST show a thumbnail preview.
+Image files MUST show a thumbnail preview (the `thumb` variant of the attached file).
 
 Video files MUST show a video icon placeholder.
 
@@ -66,7 +67,9 @@ Each preview MUST display the filename and file size.
 After an Upload is created, a background job MUST be enqueued for processing.
 
 The ProcessMediaJob MUST:
-- Generate a 400x400 thumbnail for image files
+- Generate WebP variants of the attached file for image files: `thumb` (400x400 fill),
+  `medium` (1024 limit) and `large` (2048 limit), all at quality 80
+- Extract EXIF data for image files, populating `exif_data` and `date_taken`
 - Log processing for video files (placeholder for future implementation)
 
 ### REQ-UPL-008: Upload Scopes
@@ -135,12 +138,12 @@ Upload controllers MUST respond to:
 **Then** the file SHALL be removed from the selection
 **And** the preview SHALL be removed from the display
 
-### SCENARIO: Thumbnail Generation
+### SCENARIO: Variant Generation
 
 **Given** an image file has been uploaded
 **When** the ProcessMediaJob runs
-**Then** a 400x400 thumbnail SHALL be generated
-**And** the thumbnail SHALL be attached to the Upload record
+**Then** the `thumb` (400x400), `medium` (1024) and `large` (2048) WebP variants SHALL be generated
+**And** each variant SHALL be a processed variant of the attached file
 
 ### SCENARIO: Delete Upload
 
@@ -149,7 +152,7 @@ Upload controllers MUST respond to:
 **When** they delete the upload
 **Then** the Upload record SHALL be destroyed
 **And** the attached file SHALL be purged
-**And** the attached thumbnail SHALL be purged
+**And** its derived variants SHALL be purged
 **And** the user SHALL be redirected to the gallery
 **And** a success message SHALL be displayed
 

@@ -56,8 +56,7 @@ Gallery
 Upload
   |-- belongs_to :user, :gallery
   |-- belongs_to :import (optional -- set for imported photos)
-  |-- has_one_attached :file        # the original; variants derive from this
-  |-- has_one_attached :thumbnail   # LEGACY, never written or read -- do not use
+  |-- has_one_attached :file        # the only attachment; variants derive from this
   |-- has_neighbors :embedding      # pgvector(768), written by the API
   |-- title, caption, date_taken, exif_data, analysis_data
   |-- short_code (unique, auto-generated), is_public
@@ -116,8 +115,9 @@ ApiKey
    Sizes are defined once in `ProcessMediaJob::VARIANTS` and read back by
    `UploadsHelper#upload_variant_url` / `#upload_picture_tag`, which renders a
    `<picture>` with a WebP source and the original as fallback. The original file is
-   always kept for download. There is **no** generated `thumbnail` attachment -- that
-   association is legacy and unused.
+   always kept for download. There is **no** `thumbnail` attachment -- the legacy
+   association was removed; `rake uploads:purge_legacy_thumbnails` purges any orphaned
+   blobs from storage.
 4. **Public Sharing** (no auth -- security-sensitive): every `Upload` and `Slideshow`
    gets a random `short_code` at creation (6 alphanumeric chars for uploads, 8 lowercase
    for slideshows). Photo sharing is opt-in via `Upload#is_public`; slideshow sharing is
