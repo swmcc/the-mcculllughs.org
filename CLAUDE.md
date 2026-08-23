@@ -69,15 +69,14 @@ without **libvips** (Active Storage variants) and **exiftool** (EXIF extraction)
 - **ApiKey** — Bearer tokens for the `api/` namespace, scoped `admin` or `photos:create`
 
 ### File Storage
-- Active Storage. `Upload has_one_attached :file` — the original, always retained for download
+- Active Storage. `Upload has_one_attached :file` — the original, always retained for download.
+  It is the **only** attachment; the legacy `thumbnail` attachment has been removed
 - Derived images are **Active Storage variants**, not stored attachments. Three WebP
   variants are pre-generated: `thumb` (400×400 fill), `medium` (1024 limit), `large`
   (2048 limit), all quality 80 and metadata-stripped
 - Variant definitions live in one place — `ProcessMediaJob::VARIANTS`. Read them back
   through `UploadsHelper#upload_variant_url` / `#upload_picture_tag` rather than
   redefining transforms at call sites
-- `Upload has_one_attached :thumbnail` is **legacy** — nothing writes or reads it. Do not
-  build on it
 - Development: local disk storage. Production: S3-compatible (DigitalOcean Spaces)
 
 ### Background Jobs

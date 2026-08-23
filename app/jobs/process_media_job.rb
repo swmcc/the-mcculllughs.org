@@ -65,8 +65,9 @@ class ProcessMediaJob < ApplicationJob
   end
 
   def process_video(upload)
-    # For videos, we could extract a frame for thumbnail
-    # This is a placeholder - you'd need ffmpeg or similar
+    # Videos have no derived renditions yet. A future implementation would extract a
+    # poster frame (needs ffmpeg or similar) and expose it as a variant of :file --
+    # there is no separate thumbnail attachment to populate.
     Rails.logger.info "Video processing for upload #{upload.id} would happen here"
   end
 end

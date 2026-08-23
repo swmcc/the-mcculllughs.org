@@ -70,4 +70,32 @@ namespace :uploads do
       puts "Run `rake uploads:generate_variants` to generate missing variants."
     end
   end
+
+  desc "Purge legacy :thumbnail Active Storage attachments left over from the pre-variant pipeline"
+  task purge_legacy_thumbnails: :environment do
+    attachments = ActiveStorage::Attachment.where(record_type: "Upload", name: "thumbnail")
+    total = attachments.count
+
+    if total.zero?
+      puts "No legacy thumbnail attachments found. ✓"
+      next
+    end
+
+    puts "Purging #{total} legacy thumbnail attachment(s)..."
+
+    purged = 0
+    errors = 0
+
+    attachments.find_each do |attachment|
+      attachment.purge
+      purged += 1
+      print "\rPurged: #{purged}/#{total}"
+    rescue StandardError => e
+      errors += 1
+      Rails.logger.error "Failed to purge thumbnail attachment #{attachment.id}: #{e.message}"
+    end
+
+    puts ""
+    puts "Done! Purged #{purged} attachment(s), #{errors} error(s)."
+  end
 end
