@@ -4,7 +4,7 @@ gem "aws-sdk-s3", require: false
 gem "bootsnap", require: false
 gem "devise"
 gem "dotenv-rails"
-gem "image_processing", "~> 2.0"
+gem "image_processing", "~> 2.1"
 gem "ruby-vips", "~> 2.2" # image_processing 2.0 dropped this as a dependency; required for Active Storage variants
 gem "mini_exiftool", "~> 2.11"
 gem "importmap-rails"
