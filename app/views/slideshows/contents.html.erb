@@ -1,0 +1,106 @@
+<%
+  can_edit = current_user&.admin? || @slideshow.user == current_user
+  images_data = @uploads.select { |u| u.file.attached? }.map.with_index do |u, i|
+    {
+      id: u.id,
+      index: i,
+      title: u.title,
+      caption: u.caption,
+      date_taken: u.date_taken&.to_s,
+      is_public: u.is_public,
+      short_code: u.short_code,
+      original: url_for(u.file),
+      thumb: upload_variant_url(u, :thumb),
+      medium: upload_variant_url(u, :medium),
+      large: upload_variant_url(u, :large)
+    }
+  end
+%>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+     data-controller="lightbox"
+     data-lightbox-images-value="<%= images_data.to_json %>"
+     data-lightbox-can-edit-value="<%= can_edit %>"
+     data-action="keydown@window->lightbox#keydown">
+
+  <div class="mb-6">
+    <%= link_to slideshows_path, class: "inline-flex items-center text-sm text-neutral-500 hover:text-neutral-800 transition-colors" do %>
+      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+      </svg>
+      Back
+    <% end %>
+  </div>
+
+  <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-6 mb-6">
+    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between">
+      <div class="flex-1">
+        <h1 class="text-2xl font-semibold text-neutral-800 mb-2"><%= @slideshow.title %></h1>
+        <% if @slideshow.description.present? %>
+          <p class="text-neutral-600 text-sm mb-3"><%= @slideshow.description %></p>
+        <% end %>
+        <div class="flex items-center space-x-4 text-xs text-neutral-500">
+          <span><%= @slideshow.user.name %></span>
+          <span>•</span>
+          <span><%= pluralize(@uploads.size, 'photo') %></span>
+          <span>•</span>
+          <span><%= time_ago_in_words(@slideshow.created_at) %> ago</span>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2 mt-4 lg:mt-0">
+        <%= link_to slideshow_path(@slideshow), class: "inline-flex items-center gap-1.5 px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors" do %>
+          <span>▶️</span>
+          <span>Play</span>
+        <% end %>
+        <% if can_edit %>
+          <%= link_to edit_slideshow_path(@slideshow), class: "inline-flex items-center gap-1.5 px-4 py-2 text-sm text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 rounded-lg transition-colors" do %>
+            <span>✏️</span>
+            <span>Edit</span>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <% if @uploads.any? %>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 mb-8">
+      <% @uploads.each_with_index do |upload, index| %>
+        <div id="<%= dom_id(upload) %>" class="group relative aspect-square bg-neutral-100 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200">
+          <a href="#" data-action="click->lightbox#open" data-index="<%= index %>" class="block w-full h-full">
+            <%= upload_picture_tag upload, :thumb,
+                class: "w-full h-full object-cover cursor-pointer",
+                loading: "lazy",
+                alt: upload.title,
+                data: { upload_image: upload.id } %>
+          </a>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <div class="absolute bottom-0 left-0 right-0 p-3">
+              <p class="text-white text-xs font-medium mb-1 <%= 'hidden' unless upload.title.present? %>"><%= upload.title %></p>
+              <span class="text-white/70 text-xs">#<%= index + 1 %></span>
+            </div>
+          </div>
+          <% if can_edit %>
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+              <%= button_to remove_upload_slideshow_path(@slideshow, upload_id: upload.id),
+                    method: :delete,
+                    data: { turbo_confirm: "Remove this photo from the slideshow? The photo itself will not be deleted." },
+                    title: "Remove from slideshow",
+                    class: "p-1.5 bg-black/50 hover:bg-red-500/80 rounded-lg text-white transition-colors" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white rounded-xl border border-neutral-200 shadow-sm p-12 text-center">
+      <p class="text-neutral-500">This slideshow has no photos yet.</p>
+      <% if can_edit %>
+        <%= link_to "Add photos", edit_slideshow_path(@slideshow), class: "inline-block mt-3 text-sm text-blue-600 hover:text-blue-700" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
