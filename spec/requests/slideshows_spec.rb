@@ -105,6 +105,56 @@ RSpec.describe "Slideshows", type: :request do
     end
   end
 
+  describe "GET /slideshows/:id/contents" do
+    let!(:slideshow) { create(:slideshow, user: user, title: "My Slideshow") }
+
+    before do
+      uploads.each_with_index do |upload, index|
+        slideshow.slideshow_uploads.create!(upload: upload, position: index)
+      end
+    end
+
+    it "shows the slideshow's photos as a grid" do
+      get contents_slideshow_path(slideshow)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include("My Slideshow")
+      expect(response.body).to include(ActionView::RecordIdentifier.dom_id(uploads.first))
+    end
+
+    it "shows a remove-from-slideshow control to the owner" do
+      get contents_slideshow_path(slideshow)
+
+      expect(response.body).to include(remove_upload_slideshow_path(slideshow, upload_id: uploads.first.id))
+    end
+
+    it "returns 404 for another user's slideshow" do
+      other_slideshow = create(:slideshow, user: other_user)
+
+      get contents_slideshow_path(other_slideshow)
+
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "allows an admin to view any slideshow's contents" do
+      admin = create(:user, role: :admin)
+      sign_in admin
+
+      get contents_slideshow_path(slideshow)
+
+      expect(response).to have_http_status(:success)
+      expect(response.body).to include(remove_upload_slideshow_path(slideshow, upload_id: uploads.first.id))
+    end
+
+    it "redirects unauthenticated users to sign in" do
+      sign_out user
+
+      get contents_slideshow_path(slideshow)
+
+      expect(response).to redirect_to(new_user_session_path)
+    end
+  end
+
   describe "POST /slideshows/:id/add_uploads" do
     let!(:slideshow) { create(:slideshow, user: user, title: "My Slideshow") }
 
@@ -222,6 +272,14 @@ RSpec.describe "Slideshows", type: :request do
       }
 
       expect(response).to redirect_to(edit_slideshow_path(slideshow))
+    end
+
+    it "redirects back to the contents page when removal came from there" do
+      delete remove_upload_slideshow_path(slideshow),
+             params: { upload_id: uploads.first.id },
+             headers: { "HTTP_REFERER" => contents_slideshow_path(slideshow) }
+
+      expect(response).to redirect_to(contents_slideshow_path(slideshow))
     end
   end
 

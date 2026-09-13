@@ -41,6 +41,7 @@ Rails.application.routes.draw do
       get :search
     end
     member do
+      get :contents
       post :add_uploads
       delete :remove_upload
       patch :reorder_uploads

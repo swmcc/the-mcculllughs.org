@@ -39,6 +39,15 @@ class SlideshowsController < ApplicationController
     end
   end
 
+  def contents
+    @slideshow = if current_user.admin?
+      Slideshow.find(params[:id])
+    else
+      current_user.slideshows.find(params[:id])
+    end
+    @uploads = @slideshow.uploads.with_file
+  end
+
   def create
     @slideshow = current_user.slideshows.build(slideshow_params)
 
@@ -125,12 +134,12 @@ class SlideshowsController < ApplicationController
 
     if slideshow_upload&.destroy
       respond_to do |format|
-        format.html { redirect_to edit_slideshow_path(@slideshow), notice: "Photo removed from slideshow" }
+        format.html { redirect_back fallback_location: edit_slideshow_path(@slideshow), notice: "Photo removed from slideshow" }
         format.json { render json: { success: true, total_count: @slideshow.uploads.count } }
       end
     else
       respond_to do |format|
-        format.html { redirect_to edit_slideshow_path(@slideshow), alert: "Could not remove photo" }
+        format.html { redirect_back fallback_location: edit_slideshow_path(@slideshow), alert: "Could not remove photo" }
         format.json { render json: { error: "Could not remove photo" }, status: :unprocessable_content }
       end
     end
