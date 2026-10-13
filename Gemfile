@@ -29,7 +29,7 @@ gem "oauth", "~> 1.1"   # OAuth 1.0a (Flickr)
 gem "oauth2", "~> 2.0"  # OAuth 2.0 (Google, Facebook)
 
 group :development, :test do
-  gem "brakeman", "~> 8.0.6", require: false
+  gem "brakeman", "~> 8.1.0", require: false
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "factory_bot_rails"
   gem "faker"
