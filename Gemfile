@@ -26,7 +26,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # OAuth for external photo imports
 gem "oauth", "~> 1.1"   # OAuth 1.0a (Flickr)
-gem "oauth2", "~> 2.0"  # OAuth 2.0 (Google, Facebook)
+gem "oauth2", "~> 2.1"  # OAuth 2.0 (Google, Facebook)
 
 group :development, :test do
   gem "brakeman", "~> 8.0.6", require: false
